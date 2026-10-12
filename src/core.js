@@ -39,6 +39,12 @@ export const STAGE_LABELS = Object.freeze({
 export const TERMINAL_STAGES = Object.freeze(["hired", "rejected", "withdrawn"]);
 export const WAITING_ON = Object.freeze(["company", "candidate", "external"]);
 
+export const CSV_LIMITS = Object.freeze({
+  maxCharacters: 2 * 1024 * 1024,
+  maxDataRows: 25_000,
+  maxColumns: 64,
+});
+
 const ALLOWED_COLUMNS = new Set([...REQUIRED_COLUMNS, ...OPTIONAL_COLUMNS]);
 const SENSITIVE_COLUMN_PATTERN = /(gender|sex|age|race|ethnic|relig|disab|national|photo|address|phone|salary|school|university)/i;
 
@@ -114,6 +120,14 @@ export function parseCsv(input) {
   if (!source.trim()) {
     return { headers: [], rows: [], errors: ["The CSV is empty."], warnings: [] };
   }
+  if (source.length > CSV_LIMITS.maxCharacters) {
+    return {
+      headers: [],
+      rows: [],
+      errors: ["The CSV exceeds the 2 MB processing limit."],
+      warnings: [],
+    };
+  }
 
   const records = [];
   const errors = [];
@@ -149,6 +163,14 @@ export function parseCsv(input) {
     } else if (char === "\n") {
       row.push(field);
       pushRecord(records, row, rowStartLine);
+      if (records.length > CSV_LIMITS.maxDataRows + 1) {
+        return {
+          headers: [],
+          rows: [],
+          errors: [`The CSV exceeds the ${CSV_LIMITS.maxDataRows.toLocaleString("en-US")}-row processing limit.`],
+          warnings: [],
+        };
+      }
       row = [];
       field = "";
       line += 1;
@@ -157,6 +179,14 @@ export function parseCsv(input) {
       if (source[index + 1] !== "\n") {
         row.push(field);
         pushRecord(records, row, rowStartLine);
+        if (records.length > CSV_LIMITS.maxDataRows + 1) {
+          return {
+            headers: [],
+            rows: [],
+            errors: [`The CSV exceeds the ${CSV_LIMITS.maxDataRows.toLocaleString("en-US")}-row processing limit.`],
+            warnings: [],
+          };
+        }
         row = [];
         field = "";
         line += 1;
@@ -171,6 +201,14 @@ export function parseCsv(input) {
   if (field !== "" || row.length > 0) {
     row.push(field);
     pushRecord(records, row, rowStartLine);
+    if (records.length > CSV_LIMITS.maxDataRows + 1) {
+      return {
+        headers: [],
+        rows: [],
+        errors: [`The CSV exceeds the ${CSV_LIMITS.maxDataRows.toLocaleString("en-US")}-row processing limit.`],
+        warnings: [],
+      };
+    }
   }
 
   if (records.length === 0) {
@@ -178,6 +216,9 @@ export function parseCsv(input) {
   }
 
   const headers = records[0].values.map((value) => canonicalToken(value).replace(/ /g, "_"));
+  if (headers.length > CSV_LIMITS.maxColumns) {
+    errors.push(`The CSV has ${headers.length} columns; the maximum is ${CSV_LIMITS.maxColumns}.`);
+  }
   const duplicateHeaders = headers.filter((header, index) => headers.indexOf(header) !== index);
   if (duplicateHeaders.length) {
     errors.push(`Duplicate column name(s): ${[...new Set(duplicateHeaders)].join(", ")}.`);
@@ -196,6 +237,10 @@ export function parseCsv(input) {
   const sensitiveColumns = ignoredColumns.filter((header) => SENSITIVE_COLUMN_PATTERN.test(header));
   if (sensitiveColumns.length) {
     warnings.push(`Sensitive column(s) were ignored: ${sensitiveColumns.join(", ")}.`);
+  }
+
+  if (duplicateHeaders.length || missingHeaders.length || headers.length > CSV_LIMITS.maxColumns) {
+    return { headers, rows: [], errors, warnings, ignoredColumns };
   }
 
   const rows = [];
@@ -235,7 +280,7 @@ const STAGE_ACTIONS = Object.freeze({
   assessment: "review the submission or clarify the completion plan today",
   interview: "collect the missing feedback, hold the debrief, and update the candidate",
   reference_check: "unblock the checks, record an ETA, and update the candidate",
-  offer: "resolve the approval or open question and call the candidate today",
+  offer: "resolve the approval or open question and contact the candidate through the approved channel today",
 });
 
 export function suggestedAction(record) {
@@ -248,7 +293,7 @@ export function suggestedAction(record) {
     return "send one courteous reminder with a clear response-by date and offer help";
   }
   if (record.waitingOn === "external") {
-    return "chase the outside dependency, record an ETA, and update the candidate";
+    return "follow up with the outside dependency, record an ETA, and update the candidate";
   }
   return stageAction;
 }
@@ -396,6 +441,7 @@ export function analyzeBoard(rows, options = {}) {
       contactPoints,
       priorityScore,
       stalled,
+      asOf: formatIsoDate(asOf),
     };
     record.action = suggestedAction(record);
     record.explanation = oneSentenceExplanation(record);
@@ -467,6 +513,9 @@ export function exportQueueCsv(flagged) {
     "priority_score",
     "explanation",
     "recommended_action",
+    "review_status",
+    "decision_scope",
+    "as_of_date",
   ];
   const rows = flagged.map((record, index) => ({
     rank: record.rank ?? index + 1,
@@ -482,6 +531,9 @@ export function exportQueueCsv(flagged) {
     priority_score: record.priorityScore,
     explanation: record.explanation,
     recommended_action: record.action,
+    review_status: "NEEDS_HUMAN_REVIEW",
+    decision_scope: "WORKFLOW_DELAY_ONLY",
+    as_of_date: record.asOf,
   }));
   return serializeCsv(rows, headers);
 }

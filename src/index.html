@@ -126,6 +126,12 @@
         </div>
 
         <div id="threshold-rail" class="threshold-rail" aria-label="Effective stage limits"></div>
+        <aside class="upload-boundary" aria-label="CSV safety boundary">
+          <strong>BEFORE YOU UPLOAD</strong>
+          <span>Use synthetic or authorized data only.</span>
+          <span>2 MB · 25,000 rows · 64 columns maximum.</span>
+          <span>Structural failures stop ranking; nothing is uploaded or saved.</span>
+        </aside>
       </section>
 
       <section class="metrics shell" aria-label="Board summary">
@@ -169,6 +175,11 @@
               </button>
             </div>
           </div>
+
+          <p class="review-boundary" role="note">
+            <strong>Human review required.</strong> These are workflow-delay prompts, not candidate decisions.
+            Verify the source record, approved contact channel, and next action before outreach.
+          </p>
 
           <div class="filter-bar" aria-label="Queue filters">
             <label class="search-field">
@@ -262,11 +273,22 @@
           </div>
         </aside>
 
+        <aside class="release-snapshot" aria-label="Canonical release evidence">
+          <div>
+            <span>CANONICAL CLI SNAPSHOT</span>
+            <strong>39/39 tests · 10,000 rows: 40.38 ms median / 49.26 ms p95</strong>
+          </div>
+          <p>
+            Evidence ID <code>driftline-2026-10-12T20:42:00+05:30</code> · 5 warmups + 25 measured runs.
+            The live table below is a separate, device-specific browser check and is expected to differ.
+          </p>
+        </aside>
+
         <div id="benchmark-grid" class="benchmark-grid">
           <article class="benchmark-card benchmark-card--results signal-spotlight" aria-labelledby="benchmark-title">
             <div class="benchmark-card__head">
               <div>
-                <p class="label">ENGINE BENCHMARK</p>
+                <p class="label">LIVE BROWSER CHECK · NON-CANONICAL</p>
                 <h3 id="benchmark-title">Parse → validate → rank</h3>
               </div>
               <button id="run-benchmark" class="solid-button solid-button--small" type="button">
@@ -300,7 +322,7 @@
 
           <article class="benchmark-card benchmark-card--proof signal-spotlight">
             <p class="label">CORRECTNESS GATE</p>
-            <div class="proof-score"><strong>34</strong><span>/ 34<br />PASSING</span></div>
+            <div class="proof-score"><strong>39</strong><span>/ 39<br />PASSING</span></div>
             <ul class="proof-list">
               <li><span>✓</span> Exact sample reconciliation</li>
               <li><span>✓</span> Stable order across every run</li>
@@ -355,11 +377,25 @@
           The index uses stage age, the applicable limit, an overdue recorded commitment, waiting responsibility, and contact age. It never predicts quality, interest, performance, or hire probability.
         </p>
       </section>
+
+      <section class="safety-boundary shell" aria-labelledby="safety-title">
+        <div class="safety-boundary__heading">
+          <p class="eyebrow"><span>FAIL CLOSED</span> / SAFETY CONTRACT</p>
+          <h2 id="safety-title">A queue should never outrun its evidence.</h2>
+          <p>Driftline limits what enters, what influences priority, and what can leave the browser.</p>
+        </div>
+        <div class="safety-grid">
+          <article><span>01</span><h3>Bound the workload</h3><p>Files above 2 MB, 25,000 rows, or 64 columns are rejected before ranking.</p></article>
+          <article><span>02</span><h3>Quarantine ambiguity</h3><p>Missing or duplicate headers, duplicate IDs, invalid stages, and contradictory dates never enter the queue.</p></article>
+          <article><span>03</span><h3>Minimize data</h3><p>Identity is display-only. Sensitive and extra columns are ignored and excluded from exports.</p></article>
+          <article><span>04</span><h3>Require a person</h3><p>Exports are labeled NEEDS_HUMAN_REVIEW and WORKFLOW_DELAY_ONLY. Nothing is sent or written automatically.</p></article>
+        </div>
+      </section>
     </main>
 
     <footer class="footer shell">
       <p><strong>DRIFTLINE / PROTOTYPE 01</strong><br />Synthetic data only. Human review is mandatory.</p>
-      <p>Deterministic rules · zero runtime AI · no network data transfer</p>
+      <p>Deterministic rules · zero runtime AI · CSV data stays in this browser · no upload endpoint</p>
     </footer>
 
     <dialog id="rules-dialog" class="rules-dialog">
@@ -386,6 +422,14 @@
         <section>
           <span class="step-number">04</span>
           <div><h3>Keep the decision human</h3><p>Fixed templates explain the facts and suggest an action. Driftline never advances, rejects, messages, or edits a candidate record.</p></div>
+        </section>
+        <section>
+          <span class="step-number">05</span>
+          <div><h3>Fail closed on unsafe structure</h3><p>Missing or duplicate headers and workload-limit breaches produce a visible error and an empty queue instead of a partial ranking.</p></div>
+        </section>
+        <section>
+          <span class="step-number">06</span>
+          <div><h3>Label every export</h3><p>Queue exports carry NEEDS_HUMAN_REVIEW, WORKFLOW_DELAY_ONLY, and the as-of date so the boundary survives outside this page.</p></div>
         </section>
       </div>
       <div class="dialog-foot"><span>Same input + same settings = same queue.</span><button id="acknowledge-rules" class="solid-button" type="button">Understood</button></div>

@@ -1,4 +1,5 @@
 import {
+  CSV_LIMITS,
   STAGE_FACTORS,
   STAGE_LABELS,
   analyzeBoard,
@@ -657,24 +658,33 @@ function scheduleBenchmarks() {
 
 async function handleFile(file) {
   if (!file) return;
-  const limit = 2 * 1024 * 1024;
-  if (file.size > limit) {
+  if (file.size > CSV_LIMITS.maxCharacters) {
     showToast("Choose a CSV smaller than 2 MB");
+    announce("The selected file was rejected because it exceeds the 2 MB processing limit.");
     return;
   }
   if (!file.name.toLowerCase().endsWith(".csv")) {
     showToast("Driftline accepts .csv files only");
+    announce("The selected file was rejected because it is not a CSV file.");
     return;
   }
-  const today = new Date();
-  state.asOf = [
-    today.getFullYear(),
-    String(today.getMonth() + 1).padStart(2, "0"),
-    String(today.getDate()).padStart(2, "0"),
-  ].join("-");
-  dom.asOfInput.value = state.asOf;
-  await loadCsvText(await file.text(), file.name);
-  showToast("CSV processed locally");
+  try {
+    const today = new Date();
+    state.asOf = [
+      today.getFullYear(),
+      String(today.getMonth() + 1).padStart(2, "0"),
+      String(today.getDate()).padStart(2, "0"),
+    ].join("-");
+    dom.asOfInput.value = state.asOf;
+    await loadCsvText(await file.text(), file.name);
+    showToast("CSV processed locally");
+  } catch (error) {
+    console.error(error);
+    showToast("The CSV could not be read");
+    announce("The selected CSV could not be read. No queue was created.");
+  } finally {
+    dom.fileInput.value = "";
+  }
 }
 
 function bindEvents() {

@@ -75,12 +75,30 @@ Work began on **12 October 2026**. Everything currently completed happened on th
 - Ran the final suite and benchmark from one source state and recorded one canonical snapshot in `docs/final-evidence.json`.
 - Verified anonymous access to the public URL returns Driftline with HTTP 200 and no redirect.
 - Added evidence-drift checks so stale test and benchmark figures fail the suite.
-- Preserved explicit limits: calendar days, fixed stage taxonomy, browser memory, 2 MB UI limit, no ATS sync, authentication, automatic messaging, or production-readiness claim.
+- Preserved explicit limits: calendar days, fixed stage taxonomy, browser memory, 2 MB / 25,000-row / 64-column workload ceilings, no ATS sync, authentication, automatic messaging, or production-readiness claim.
 - Corrected the submission story instead of hiding the fact that only one calendar day has elapsed.
 
 **Final Day-1 evidence:** `npm test` and `npm run benchmark` results are copied from `docs/final-evidence.json`; that manifest is the only numeric source of truth.
 
 **Manual dependency:** record/upload the final five-minute demo to Loom and paste the authenticated share link.
+
+## Same-day evaluation rehearsal - 2026-10-12 - COMPLETE, NOT ADDITIONAL CALENDAR DAYS
+
+The user asked to run the recommended Day 2-5 checks immediately and improve guardrails. I ran those tasks as additional Day-1 work. This increases verification coverage but does **not** convert 12 October into four later calendar days.
+
+- Re-ran fast, standard, and slow-stage below/exact/above boundaries.
+- Re-ran malformed, contradictory, duplicate, inert-HTML, formula-prefix, sensitive-field, and export checks.
+- Added parser-level ceilings of 2 MB, 25,000 data rows, and 64 columns.
+- Made missing or duplicate required headers fail closed before ranking.
+- Added `NEEDS_HUMAN_REVIEW`, `WORKFLOW_DELAY_ONLY`, and the as-of date to every queue export.
+- Replaced “call” and “chase” language with approved-channel and professional follow-up wording.
+- Separated the canonical CLI snapshot from the live, device-specific browser benchmark in the interface.
+- Rehearsed the browser path with the synthetic CSV: upload, 7-to-10-day sensitivity change, search, stage and owner filters, visible rank arithmetic, adversarial demo, and filtered export. The export retained global ranks 6-8 and all three review-boundary fields.
+- Tabbed from the skip link through navigation, primary actions, the drop zone, and CSV button; no browser console warnings or errors appeared.
+
+**What broke:** the first expanded suite passed 38 of 39 tests. The old combined test expected malformed-row-width inspection to continue after missing headers. That expectation contradicted the new fail-closed rule. I split the two cases: missing headers now stop parsing, while malformed widths remain visible when the header structure is safe. The corrected suite passed 39/39.
+
+**Evidence:** `tests/core.test.mjs`, `tests/frontend.test.mjs`, `src/core.js`, `src/index.html`, and `docs/final-evidence.json`.
 
 ## Day 2 - 2026-10-13 - PLANNED, NOT YET EVIDENCE
 

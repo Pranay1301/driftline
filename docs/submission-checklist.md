@@ -12,6 +12,6 @@
 
 Before submitting, confirm that the calendar log is truthful. As of 12 October 2026, only Day 1 is complete; Days 2-5 are planned and are not yet evidence. Do not mark them complete or submit them as five elapsed days until the dated work actually occurs.
 
-Final evidence ID: `driftline-2026-10-12T19:57:35+05:30` - 34/34 tests, 10,000-row benchmark at 49.49 ms median / 146.99 ms p95, correctness PASS.
+Final evidence ID: `driftline-2026-10-12T20:42:00+05:30` - 39/39 tests, 10,000-row benchmark at 40.38 ms median / 49.26 ms p95, correctness PASS.
 
 Do not claim that the Loom link is complete until the authenticated upload succeeds.

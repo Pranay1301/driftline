@@ -36,7 +36,7 @@ To run the automated checks:
 npm test
 ```
 
-Expected result: **34/34 passing tests**.
+Expected result: **39/39 passing tests**.
 
 To run the repeatable local engine benchmark:
 
@@ -79,6 +79,8 @@ Dates must use `YYYY-MM-DD`. Column order does not matter. Whitespace is trimmed
 | `next_step_due_on` | No | No commitment component | Yes if before the as-of date |
 
 Extra columns are ignored and reported. Sensitive-looking columns such as `gender`, `age`, `race`, `disability`, `school`, or `salary` are explicitly called out as ignored.
+
+The browser and parser both enforce a 2 MB input ceiling. The parser also rejects more than 25,000 data rows or 64 columns. Missing or duplicate required headers fail closed: Driftline reports the structural problem and produces no ranked queue.
 
 Recognized active stages and aliases:
 
@@ -157,7 +159,7 @@ Driftline makes data problems visible instead of silently dropping them:
 - malformed CSV field counts
 - ignored and sensitive-looking extra columns
 
-Rendered cells use text nodes, so HTML in a CSV stays inert. Exported values beginning with `=`, `+`, `-`, or `@` receive a leading apostrophe to reduce spreadsheet-formula injection risk.
+Rendered cells use text nodes, so HTML in a CSV stays inert. Exported values beginning with `=`, `+`, `-`, `@`, tab, or carriage return receive a leading apostrophe to reduce spreadsheet-formula injection risk. Queue exports also carry `NEEDS_HUMAN_REVIEW`, `WORKFLOW_DELAY_ONLY`, and the as-of date so the decision boundary survives outside the interface.
 
 Use synthetic data for public demos. This prototype has no authentication, persistence, production privacy review, ATS integration, holiday calendar, or localization.
 
@@ -167,6 +169,8 @@ Use synthetic data for public demos. This prototype has no authentication, persi
 
 - quoted CSV fields, commas, Unicode, BOM, and CRLF
 - missing headers and malformed row widths
+- parser-level file, row, and column ceilings
+- structural failures that stop ranking
 - stage factors and ceiling behavior
 - below / exactly at / above the inclusive threshold
 - contact that does not reset stage age
@@ -179,6 +183,7 @@ Use synthetic data for public demos. This prototype has no authentication, persi
 - name / role / ignored-field score invariance
 - deterministic explanations and actions
 - spreadsheet-formula neutralization
+- explicit human-review and workflow-only export labels
 - monotonic threshold sensitivity
 - fixed sample reconciliation
 - an adversarial corpus with inert HTML, spreadsheet-formula protection, duplicate quarantine, and ignored sensitive columns
@@ -191,17 +196,19 @@ Use synthetic data for public demos. This prototype has no authentication, persi
 
 `npm run benchmark` creates deterministic synthetic CSV text once, then measures the real **CSV parse + validation + ranking** path. It uses 5 warmups and 25 measured runs per scale, keeps outliers, and reports the median, interpolated p95, throughput, and a correctness result.
 
-Canonical release snapshot (`docs/final-evidence.json`), captured 2026-10-12 at 19:57:35 IST on Apple M2 / 8 GB / macOS 26.5.1 / Node 24.21.0:
+Canonical release snapshot (`docs/final-evidence.json`), captured 2026-10-12 at 20:42:00 IST on Apple M2 / 8 GB / macOS 26.5.1 / Node 24.21.0:
 
 | Rows | Median | P95 | Rows / second | Correctness |
 |---:|---:|---:|---:|---:|
-| 100 | 0.40 ms | 0.79 ms | 250,313 | PASS |
-| 1,000 | 4.43 ms | 7.55 ms | 225,613 | PASS |
-| 10,000 | 49.49 ms | 146.99 ms | 202,078 | PASS |
+| 100 | 0.39 ms | 0.66 ms | 255,320 | PASS |
+| 1,000 | 3.84 ms | 4.51 ms | 260,086 | PASS |
+| 10,000 | 40.38 ms | 49.26 ms | 247,628 | PASS |
 
 Data generation, file reading, and DOM rendering are outside the timer. These numbers demonstrate the prototype engine on one machine; they are not a production-capacity claim. Browser values vary and are intentionally measured again on each device.
 
-The same release snapshot records **34/34** tests passing. Browser checks verify the sample load, adversarial demo, filters, 7→10-day sensitivity (9→5 rows), score breakdown, decision-rules dialog, data-quality panel, benchmark rerun, CSV export, and current-page console state. Automated viewport control passed at 390, 500, 821, 1180, and 1440 CSS pixels with no horizontal overflow or console warnings/errors. No physical-device or full assistive-technology audit was performed.
+The same release snapshot records **39/39** tests passing. Browser checks verify the sample load, adversarial demo, filters, 7→10-day sensitivity (9→5 rows), score breakdown, decision-rules dialog, data-quality panel, benchmark rerun, CSV export, and current-page console state. Automated viewport control passed at 390, 500, 821, 1180, and 1440 CSS pixels with no horizontal overflow or console warnings/errors. No physical-device or full assistive-technology audit was performed.
+
+The page labels its automatic benchmark as a **live, non-canonical browser check**. Those numbers are expected to differ by device and run. The table above is the canonical CLI snapshot used in the release documents.
 
 ## Visual enhancement
 
@@ -226,6 +233,7 @@ driftline/
 │   ├── index.html
 │   └── styles.css
 ├── tests/core.test.mjs
+├── tests/benchmark.test.mjs
 ├── tests/evidence.test.mjs
 ├── tests/frontend.test.mjs
 └── package.json
@@ -236,7 +244,7 @@ driftline/
 - Calendar days only; weekends and holidays are not excluded.
 - Fixed stage taxonomy and default factors; edit `STAGE_FACTORS` to change policy.
 - Input is kept only in browser memory and disappears on refresh.
-- Files above 2 MB are rejected by the interface.
+- Files above 2 MB, 25,000 data rows, or 64 columns are rejected before ranking.
 - No ATS sync, collaboration, sign-in, automatic messages, or persistence.
 - The runtime is deterministic and intentionally has no LLM; AI was used in the build-and-check process documented in `docs/five-day-log.md`.
 - Browser viewport automation covered 390-1440 CSS pixels, but no physical-device or full assistive-technology audit was performed.

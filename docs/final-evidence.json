@@ -1,16 +1,16 @@
 {
-  "evidence_id": "driftline-2026-10-12T19:57:35+05:30",
-  "captured_on": "2026-10-12T19:57:35+05:30",
+  "evidence_id": "driftline-2026-10-12T20:42:00+05:30",
+  "captured_on": "2026-10-12T20:42:00+05:30",
   "calendar_days_completed": 1,
   "engine_source": {
     "core": "src/core.js",
-    "core_sha256": "381b1c6cba6616db476e27ee4f329bf6cbe0398caa13c853464970f0fc30cea1",
+    "core_sha256": "55900456d87394cd3cdfb870f8f8494191e03d6c55ecc17c241545e6792356c1",
     "benchmark": "src/benchmark.js",
     "benchmark_sha256": "34786832641682caf92fa561088444466416515f844c84949fae70901ef32822"
   },
   "test_suite": {
     "command": "npm test",
-    "passing": 34,
+    "passing": 39,
     "failing": 0
   },
   "cli_benchmark": {
@@ -31,9 +31,9 @@
       "node": "v24.21.0"
     },
     "results": [
-      { "rows": 100, "median_ms": 0.4, "p95_ms": 0.79, "rows_per_second": 250313, "correctness": "PASS" },
-      { "rows": 1000, "median_ms": 4.43, "p95_ms": 7.55, "rows_per_second": 225613, "correctness": "PASS" },
-      { "rows": 10000, "median_ms": 49.49, "p95_ms": 146.99, "rows_per_second": 202078, "correctness": "PASS" }
+      { "rows": 100, "median_ms": 0.39, "p95_ms": 0.66, "rows_per_second": 255320, "correctness": "PASS" },
+      { "rows": 1000, "median_ms": 3.84, "p95_ms": 4.51, "rows_per_second": 260086, "correctness": "PASS" },
+      { "rows": 10000, "median_ms": 40.38, "p95_ms": 49.26, "rows_per_second": 247628, "correctness": "PASS" }
     ]
   },
   "browser_verification": {
@@ -44,19 +44,35 @@
     "horizontal_overflow": false,
     "console_warnings_or_errors": 0,
     "workflows": [
-      "sample baseline reset",
+      "synthetic CSV upload and sample baseline reset",
       "threshold 7 to 10 changes queue 9 to 5",
       "search and stage, owner, responsibility filters",
       "rank explanation",
       "data-quality review",
       "full filtered queue export with global ranks",
       "adversarial demo",
-      "browser benchmark"
+      "browser benchmark",
+      "keyboard focus path"
     ]
   },
   "timeline": {
     "day_1": "complete",
     "days_2_to_5": "planned_not_yet_evidence",
-    "backdated": false
+    "backdated": false,
+    "same_day_rehearsal": [
+      "multi-stage boundary matrix",
+      "adversarial CSV and export checks",
+      "browser workflow and responsive checks",
+      "clean build, test, benchmark, package, and public-access checks"
+    ]
+  },
+  "safety_guardrails": {
+    "input_limits": { "max_bytes": 2097152, "max_rows": 25000, "max_columns": 64 },
+    "structural_failures_stop_ranking": true,
+    "sensitive_extra_columns_ignored": true,
+    "export_review_status": "NEEDS_HUMAN_REVIEW",
+    "export_decision_scope": "WORKFLOW_DELAY_ONLY",
+    "automatic_outreach": false,
+    "ats_writes": false
   }
 }

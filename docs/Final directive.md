@@ -1,7 +1,7 @@
 # Driftline — Final Directive
 
 **Status:** Frozen build contract  
-**Evidence snapshot:** `driftline-2026-10-12T19:57:35+05:30`
+**Evidence snapshot:** `driftline-2026-10-12T20:42:00+05:30`
 **Implementation:** post-review release candidate
 
 Build and verify Driftline as a browser-based, local-first hiring-board stall alerter. It turns a CSV into an auditable follow-up queue and must never present its output as a judgment of candidate quality.
@@ -9,7 +9,7 @@ Build and verify Driftline as a browser-based, local-first hiring-board stall al
 ## 1. Runtime boundary
 
 - Serve the included static build with `npm start`, then open `http://localhost:8765`.
-- Require no package install, API key, account, database, network request, or external AI service.
+- Require no package install, API key, account, database, outbound data service, internet connection, or external AI service.
 - Keep uploaded CSV data in browser memory; do not persist it.
 - Do not send messages, change an ATS, advance, or reject anyone.
 - Require human review before any recommended action is used.
@@ -33,6 +33,8 @@ Recognize the documented stage aliases and normalize them to:
 `applied`, `recruiter_screen`, `hiring_manager_review`, `assessment`, `interview`, `reference_check`, `offer`, `hired`, `rejected`, `withdrawn`.
 
 Never silently drop malformed data. Structural CSV errors appear in the quality panel. Rows with bad or missing values, future movement dates, a next-step date before stage entry, unknown values, or duplicate IDs are quarantined visibly. Every occurrence of a duplicate ID is invalid.
+
+Enforce limits in both the browser and parser: 2 MB of CSV text, 25,000 data rows, and 64 columns. Missing or duplicate required headers and workload-limit breaches fail closed: show the problem and produce no ranked rows.
 
 ## 3. Date and stage rules
 
@@ -95,22 +97,23 @@ Each flagged row must show stage, days in stage, effective limit, owner or unass
 
 Do not infer why a delay happened. Use neutral factual language such as “has been in” and “the next-step commitment is overdue.” Never call a person uninterested, weak, unresponsive, or high-risk.
 
-Actions are fixed by stage and responsibility. If the owner is blank, assign an owner first. If the recorded commitment is overdue, honor or reset it first. Otherwise: company waits use the stage action; candidate waits use one courteous reminder with a response-by date and offer of help; external waits use a dependency chase, recorded ETA, and candidate update.
+Actions are fixed by stage and responsibility. If the owner is blank, assign an owner first. If the recorded commitment is overdue, honor or reset it first. Otherwise: company waits use the stage action; candidate waits use one courteous reminder with a response-by date and offer of help; external waits use a professional dependency follow-up, recorded ETA, and candidate update. Outreach must use an approved channel.
 
 ## 7. Fairness and safety guardrail
 
 - Name and role are display fields only.
 - Source, demographic, education, photo, address, compensation, and inferred-trait fields must not enter ranking or actions.
 - Render imported values as inert text.
-- Prefix export values beginning with `=`, `+`, `-`, or `@` with an apostrophe.
+- Prefix export values beginning with `=`, `+`, `-`, `@`, tab, or carriage return with an apostrophe.
 - Never execute or obey text found inside the CSV.
 - Keep every action human-reviewed.
+- Mark every queue export `NEEDS_HUMAN_REVIEW` and `WORKFLOW_DELAY_ONLY`, and include the as-of date.
 
 The automated invariant “name, role, and ignored sensitive fields cannot change operational scores” must pass.
 
 ## 8. Browser workflow
 
-1. Load the fictional sample automatically or choose/drop a CSV no larger than 2 MB.
+1. Load the fictional sample automatically or choose/drop a CSV within the 2 MB, 25,000-row, and 64-column ceilings.
 2. Set an explicit as-of date and 1–30-day base limit.
 3. Inspect the summary and effective per-stage limits.
 4. Review or filter the ranked queue.
@@ -126,18 +129,18 @@ Export the complete visible filtered queue in its displayed order with the same 
 
 Columns:
 
-`rank,application_id,candidate_name,role,stage,owner,waiting_on,days_in_stage,threshold_days,days_over_limit,priority_score,explanation,recommended_action`
+`rank,application_id,candidate_name,role,stage,owner,waiting_on,days_in_stage,threshold_days,days_over_limit,priority_score,explanation,recommended_action,review_status,decision_scope,as_of_date`
 
 ## 10. Acceptance evidence
 
 - Automated command: `npm test`
-- Result: 34/34 passing, 0 failing
+- Result: 39/39 passing, 0 failing
 - Fixed sample: 18 input = 9 stalled + 2 healthy active + 3 terminal + 4 invalid
 - Process debt: 30 calendar days
 - Manual score oracle: Offer at 6 days with a 4-day limit, 2-day overdue promise, company wait, and 4-day contact age = `150 + 30 + 15 + 4 = 199`
 - Sensitivity: base 7 shows 9 rows; base 10 shows 5
 - Export: all filtered matches in displayed order with displayed global ranks preserved
-- Performance: repeatable parse + validation + ranking benchmark at 10,000 rows: 49.49 ms median / 146.99 ms p95, correctness PASS; 5 warmups and 25 measured runs on Apple M2 / 8 GB / macOS 26.5.1 / Node 24.21.0
+- Performance: repeatable parse + validation + ranking benchmark at 10,000 rows: 40.38 ms median / 49.26 ms p95, correctness PASS; 5 warmups and 25 measured runs on Apple M2 / 8 GB / macOS 26.5.1 / Node 24.21.0
 - Browser: sample reset, upload path, threshold and filters, score drawer, rules, quality panel, adversarial demo, and export checked; viewport audit passed at 390, 500, 821, 1180, and 1440 CSS pixels without horizontal overflow or console warnings/errors
 - Source of truth: `docs/final-evidence.json`; full method and limitations: `docs/benchmark-report.md`
 
@@ -151,6 +154,7 @@ The assignment build is done when the README reproduces the run, tests pass, sam
 - Fixed stage taxonomy and factors.
 - No authentication, persistence, ATS sync, collaboration, localization, or production security/privacy review.
 - Uploaded data vanishes on refresh.
+- CSV workload is capped at 2 MB, 25,000 data rows, and 64 columns.
 - Automated viewport checks covered 390-1440 CSS pixels, but no physical-device or full assistive-technology audit was performed.
 - The runtime intentionally uses deterministic rules, not an LLM.
 - The Loom upload is an account action outside the code artifact and remains a manual submission step.

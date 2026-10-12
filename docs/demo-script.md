@@ -20,7 +20,7 @@ The generated narrated MP4 follows these beats and expands each section slightly
 
 ## 2:05–2:50 — First priority and one-sentence explanation
 
-“Jordan is first. The application has been in Offer for nine days against a four-day limit, the next-step commitment is five days overdue, and no owner is assigned. Driftline explains all of that in one sentence and recommends assigning an owner before resolving the approval or open question and calling the candidate.”
+“Jordan is first. The application has been in Offer for nine days against a four-day limit, the next-step commitment is five days overdue, and no owner is assigned. Driftline explains all of that in one sentence and recommends assigning an owner before resolving the approval or open question and contacting the candidate through the approved channel.”
 
 ## 2:50–3:25 — Audit the rank
 
@@ -32,14 +32,14 @@ The generated narrated MP4 follows these beats and expands each section slightly
 
 ## 3:55–4:25 — Data quality and safety
 
-“Nothing disappears silently. The sample surfaces a missing date, a future movement date, and both rows sharing a duplicate ID. Extra sensitive-looking columns are ignored and reported. Imported HTML remains inert, and spreadsheet-formula prefixes are neutralized in the CSV export.”
+“Nothing disappears silently. The sample surfaces a missing date, a future movement date, and both rows sharing a duplicate ID. Files above two megabytes, twenty-five thousand rows, or sixty-four columns are rejected before ranking. Structural errors fail closed. Sensitive extras are ignored, imported HTML stays inert, formulas are neutralized, and every export says human review is required.”
 
 ## 4:25–4:50 — Evidence
 
-“The canonical release snapshot has 34/34 automated tests passing. They cover parsing, multi-stage boundary conditions, contradictory and duplicate data, deterministic ties, identity-field invariance, safe rendering, formula-safe export, reset behavior, and global export ranks. The repeatable 10,000-row engine benchmark measured 49.49 ms median and 146.99 ms p95 with correctness passing. Browser checks covered 390 through 1440 CSS pixels, filters, the nine-to-five sensitivity change, score disclosure, validation, and export.”
+“The canonical release snapshot has 39/39 automated tests passing. They cover parsing, workload ceilings, fail-closed structure, multi-stage boundaries, contradictory and duplicate data, deterministic ties, identity invariance, safe rendering, review-labeled exports, reset behavior, and global export ranks. The repeatable 10,000-row engine benchmark measured 40.38 ms median and 49.26 ms p95 with correctness passing. The live table is a separate device-specific browser check. Browser checks covered 390 through 1440 CSS pixels, filters, sensitivity, score disclosure, validation, and export.”
 
 ## 4:50–5:05 — Honest close
 
 “The limits are deliberate and documented: calendar days only, fixed stage factors, no ATS sync, no automatic messages, and no production security claim. The build has five passes but only one completed calendar day; future days are not backdated. What I unlearned is that AI-first does not remove judgment. It makes the generate-and-challenge loop faster, while evidence earns every important claim.”
 
-Release evidence ID: `driftline-2026-10-12T19:57:35+05:30`. Final snapshot: **34/34** tests; 10,000 rows at **49.49 ms** median / **146.99 ms** p95, correctness PASS.
+Release evidence ID: `driftline-2026-10-12T20:42:00+05:30`. Final snapshot: **39/39** tests; 10,000 rows at **40.38 ms** median / **49.26 ms** p95, correctness PASS.

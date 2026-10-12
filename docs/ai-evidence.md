@@ -87,6 +87,28 @@ The review also requested exact boundary checks, adversarial CSV cases, privacy 
 - `tests/core.test.mjs` - the added boundary, invalid-input, and export checks
 - `docs/five-day-log.md` - the calendar-day disclosure; it must keep future days pending until they actually occur
 
+## Receipt 5 - run the future checks now without inventing future days
+
+**When and provenance:** Direct user instruction on 12 October 2026, followed by guardrail implementation and the full same-day verification rehearsal.
+
+**Exact prompt:**
+
+> "Run the Recommended remaining schedule for all days today and also make improvements in guiderails and safety measures"
+
+**AI proposal:** Execute every planned boundary, adversarial, browser, clean-build, benchmark, packaging, and public-access check immediately; add parser workload ceilings, fail-closed structural validation, durable human-review labels in exports, clearer privacy wording, and an explicit distinction between live browser timing and the canonical CLI snapshot.
+
+**Human verification:** The requested checks can be performed on one day, but they cannot honestly establish five elapsed calendar days. The implementation was tested before its evidence was rewritten. The first expanded suite failed 38/39 because an old test expected row-width checking to continue after a missing-header failure. Inspection showed the new fail-closed contract was correct, so the combined oracle was split into separate structural and row-width cases.
+
+**Decision:** Accept the safety and verification work, preserve the 38/39 failure and correction, and record the work as a same-day rehearsal. Reject relabeling it as completed Days 2-5. The corrected release suite passes 39/39.
+
+**Inspectable artifacts:**
+
+- `src/core.js` - parser ceilings, fail-closed structure, safer action wording, and export boundary fields
+- `src/index.html` - visible upload, review, safety, and benchmark-provenance boundaries
+- `tests/core.test.mjs` and `tests/frontend.test.mjs` - the expanded safety checks
+- `docs/five-day-log.md` - the same-day disclosure and preserved future calendar entries
+- `docs/final-evidence.json` - the synchronized release snapshot
+
 ## Timeline integrity statement
 
 As of 12 October 2026, Driftline has evidence for **one completed calendar day**, with multiple build passes inside that day. This document will not fabricate work on 13-16 October, alter Git timestamps, or present planned checks as completed checks. Days 2-5 may only become evidence after genuine work is performed on those dates (or later) and the prompt, failure or observation, verification, and resulting change are recorded.

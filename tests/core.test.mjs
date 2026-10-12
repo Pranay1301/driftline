@@ -3,6 +3,7 @@ import { readFile } from "node:fs/promises";
 import { performance } from "node:perf_hooks";
 import test from "node:test";
 import {
+  CSV_LIMITS,
   analyzeBoard,
   exportQueueCsv,
   parseCsv,
@@ -41,9 +42,15 @@ test("CSV parser handles a BOM, CRLF, quoted commas, escaped quotes, and Unicode
 });
 
 test("missing required headers and malformed field counts are visible", () => {
-  const parsed = parseCsv("application_id,candidate_name\nA-1,Asha,extra\n");
-  assert.ok(parsed.errors.some((error) => error.startsWith("Missing required column")));
-  assert.ok(parsed.errors.some((error) => error.includes("expected 2 fields but found 3")));
+  const missing = parseCsv("application_id,candidate_name\nA-1,Asha\n");
+  assert.ok(missing.errors.some((error) => error.startsWith("Missing required column")));
+  assert.equal(missing.rows.length, 0);
+
+  const malformed = parseCsv(
+    "application_id,candidate_name,role,stage,stage_entered_on,owner,waiting_on\n" +
+      "A-1,Asha,Engineer,Interview,2026-10-01,Priya,company,extra\n",
+  );
+  assert.ok(malformed.errors.some((error) => error.includes("expected 7 fields but found 8")));
 });
 
 test("stage-aware limits use documented factors and round up", () => {
@@ -114,6 +121,46 @@ test("empty files and duplicate headers fail visibly", () => {
       "A-1,Asha,Engineer,Interview,2026-10-05,Priya,company,Priya\n",
   );
   assert.ok(duplicate.errors.includes("Duplicate column name(s): owner."));
+  assert.equal(duplicate.rows.length, 0);
+});
+
+test("structurally unsafe headers fail closed before ranking", () => {
+  const missing = parseCsv("application_id,candidate_name\nA-1,Asha\n");
+  assert.ok(missing.errors.some((error) => error.startsWith("Missing required column")));
+  assert.equal(missing.rows.length, 0);
+
+  const required = [
+    "application_id",
+    "candidate_name",
+    "role",
+    "stage",
+    "stage_entered_on",
+    "owner",
+    "waiting_on",
+  ];
+  const extras = Array.from(
+    { length: CSV_LIMITS.maxColumns - required.length + 1 },
+    (_, index) => `extra_${index}`,
+  );
+  const headers = [...required, ...extras];
+  const tooWide = parseCsv(`${headers.join(",")}\n${headers.map(() => "x").join(",")}\n`);
+  assert.ok(tooWide.errors.some((error) => error.includes("columns; the maximum is")));
+  assert.equal(tooWide.rows.length, 0);
+});
+
+test("CSV workload limits reject oversized text and excessive rows", () => {
+  const tooLarge = parseCsv("x".repeat(CSV_LIMITS.maxCharacters + 1));
+  assert.deepEqual(tooLarge.rows, []);
+  assert.ok(tooLarge.errors.includes("The CSV exceeds the 2 MB processing limit."));
+
+  const header = "application_id,candidate_name,role,stage,stage_entered_on,owner,waiting_on";
+  const rows = Array.from(
+    { length: CSV_LIMITS.maxDataRows + 1 },
+    (_, index) => `LIMIT-${index},Asha,Engineer,Interview,2026-10-01,Priya,company`,
+  );
+  const tooMany = parseCsv(`${header}\n${rows.join("\n")}`);
+  assert.deepEqual(tooMany.rows, []);
+  assert.ok(tooMany.errors.some((error) => error.includes("25,000-row processing limit")));
 });
 
 test("unknown operational values are quarantined with explicit reasons", () => {
@@ -289,6 +336,28 @@ test("filtered queue export preserves supplied order, row set, and global displa
   assert.equal(lines.length, supplied.length + 1);
   assert.ok(lines[1].startsWith("2,APP-B,"));
   assert.ok(lines[2].startsWith("1,APP-A,"));
+});
+
+test("queue exports preserve the human-review and decision-scope boundary", () => {
+  const record = analyzeBoard([row()], { asOf: AS_OF, baseThreshold: 7 }).flagged[0];
+  const csv = exportQueueCsv([record]);
+  assert.match(csv.split("\n")[0], /review_status,decision_scope,as_of_date$/);
+  assert.match(csv, /NEEDS_HUMAN_REVIEW,WORKFLOW_DELAY_ONLY,2026-10-12/);
+});
+
+test("suggested outreach uses an approved channel and professional dependency language", () => {
+  const offer = analyzeBoard(
+    [row({ stage: "Offer", owner: "", stage_entered_on: "2026-10-01" })],
+    { asOf: AS_OF, baseThreshold: 7 },
+  ).flagged[0];
+  const external = analyzeBoard(
+    [row({ application_id: "EXT", waiting_on: "external" })],
+    { asOf: AS_OF, baseThreshold: 7 },
+  ).flagged[0];
+  assert.match(offer.action, /approved channel/);
+  assert.doesNotMatch(offer.action, /call the candidate/);
+  assert.match(external.action, /follow up with the outside dependency/);
+  assert.doesNotMatch(external.action, /chase the outside dependency/);
 });
 
 test("raising the base limit cannot increase the flagged set", () => {

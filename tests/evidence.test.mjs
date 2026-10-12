@@ -17,20 +17,23 @@ test("release narratives consume one canonical evidence snapshot", async () => {
     read("docs/five-day-log.md"),
   ]);
   const evidence = JSON.parse(rawEvidence);
-  assert.equal(evidence.test_suite.passing, 34);
+  assert.equal(evidence.test_suite.passing, 39);
   assert.equal(evidence.test_suite.failing, 0);
   const tenThousand = evidence.cli_benchmark.results.find((result) => result.rows === 10000);
   assert.deepEqual(
     { median: tenThousand.median_ms, p95: tenThousand.p95_ms, check: tenThousand.correctness },
-    { median: 49.49, p95: 146.99, check: "PASS" },
+    { median: 40.38, p95: 49.26, check: "PASS" },
   );
   for (const [name, document] of Object.entries({ readme, directive, unlearning, demo, report })) {
-    assert.match(document, /34\/34/, `${name} must use the canonical test count`);
-    assert.match(document, /49\.49 ms/, `${name} must use the canonical 10k median`);
-    assert.match(document, /146\.99 ms/, `${name} must use the canonical 10k p95`);
-    assert.doesNotMatch(document, /21\/21|25\/25|roughly 28 ms|about 28 ms|34\.92 ms|35\.52 ms/);
+    assert.match(document, /39\/39/, `${name} must use the canonical test count`);
+    assert.match(document, /40\.38 ms/, `${name} must use the canonical 10k median`);
+    assert.match(document, /49\.26 ms/, `${name} must use the canonical 10k p95`);
+    assert.doesNotMatch(document, /21\/21|25\/25|34\/34|roughly 28 ms|about 28 ms|34\.92 ms|35\.52 ms/);
   }
-  assert.match(html, /<strong>34<\/strong><span>\/ 34<br \/>PASSING<\/span>/);
+  assert.match(html, /<strong>39<\/strong><span>\/ 39<br \/>PASSING<\/span>/);
+  assert.match(html, /39\/39 tests · 10,000 rows: 40\.38 ms median \/ 49\.26 ms p95/);
+  assert.equal(evidence.safety_guardrails.structural_failures_stop_ranking, true);
+  assert.equal(evidence.safety_guardrails.export_review_status, "NEEDS_HUMAN_REVIEW");
   assert.equal(evidence.calendar_days_completed, 1);
   assert.equal(evidence.timeline.days_2_to_5, "planned_not_yet_evidence");
   assert.match(log, /Day 2 - 2026-10-13 - PLANNED, NOT YET EVIDENCE/);

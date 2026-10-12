@@ -71,3 +71,15 @@ test("evidence jargon is defined in plain language at the point of use", () => {
   assert.match(html, />SENSITIVITY CHECK</);
   assert.match(html, /from 7 to 10 days changes the sample from 9 flags to 5/);
 });
+
+test("visible safety guardrails preserve privacy, fail-closed, and human-review boundaries", () => {
+  assert.match(html, /aria-label="CSV safety boundary"/);
+  assert.match(html, /2 MB · 25,000 rows · 64 columns maximum/);
+  assert.match(html, /Structural failures stop ranking/);
+  assert.match(html, /Human review required/);
+  assert.match(html, /NEEDS_HUMAN_REVIEW/);
+  assert.match(html, /WORKFLOW_DELAY_ONLY/);
+  assert.match(html, /CSV data stays in this browser · no upload endpoint/);
+  assert.match(html, /LIVE BROWSER CHECK · NON-CANONICAL/);
+  assert.match(html, /expected to differ/);
+});
