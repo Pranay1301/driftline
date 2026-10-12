@@ -36,7 +36,15 @@ To run the automated checks:
 npm test
 ```
 
-Expected result: **17 passing tests**.
+Expected result: **21 passing tests**.
+
+To run the repeatable local engine benchmark:
+
+```bash
+npm run benchmark
+```
+
+The page also runs a lighter version automatically in the **Evidence Lab** and lets you rerun it on the current browser.
 
 ## Try the verified sample
 
@@ -172,9 +180,29 @@ Use synthetic data for public demos. This prototype has no authentication, persi
 - spreadsheet-formula neutralization
 - monotonic threshold sensitivity
 - fixed sample reconciliation
-- a 10,000-row performance check (verified in about 28 ms on the build machine)
+- an adversarial corpus with inert HTML, spreadsheet-formula protection, duplicate quarantine, and ignored sensitive columns
+- deterministic benchmark generation and percentile math
+- a 10,000-row analysis performance budget
 
-Manual browser checks verified the sample load, filters, 7→10-day sensitivity (9→5 rows), score breakdown, decision-rules dialog, data-quality panel, CSV export, and absence of current-page console errors at a 1440×900 viewport.
+### Repeatable engine benchmark
+
+`npm run benchmark` creates deterministic synthetic CSV text once, then measures the real **CSV parse + validation + ranking** path. It uses 5 warmups and 25 measured runs per scale, keeps outliers, and reports the median, interpolated p95, throughput, and a correctness result.
+
+Reference run on the build machine:
+
+| Rows | Median | P95 | Rows / second | Correctness |
+|---:|---:|---:|---:|---:|
+| 100 | 0.36 ms | 0.55 ms | 276,434 | PASS |
+| 1,000 | 3.16 ms | 3.96 ms | 316,568 | PASS |
+| 10,000 | 34.92 ms | 44.71 ms | 286,346 | PASS |
+
+Data generation, file reading, and DOM rendering are outside the timer. These numbers demonstrate the prototype engine on one machine; they are not a production-capacity claim. Browser values vary and are intentionally measured again on each device.
+
+Manual browser checks verify the sample load, adversarial demo, filters, 7→10-day sensitivity (9→5 rows), score breakdown, decision-rules dialog, data-quality panel, benchmark rerun, responsive layout, CSV export, and current-page console state.
+
+## Visual enhancement
+
+The Evidence Lab uses an original **Signal Spotlight** treatment inspired by FreeFrontend's [Interactive Glowing Grid Cards](https://freefrontend.com/code/interactive-glowing-grid-cards-2026-03-09/). Pointer coordinates update two CSS custom properties on only the active tile; the content remains unchanged and fully usable without JavaScript. Keyboard focus gets a static halo, while touch and reduced-motion modes disable the tracking effect.
 
 ## Project structure
 
@@ -187,8 +215,10 @@ driftline/
 │   ├── hiring_board.csv
 │   └── adversarial.csv
 ├── scripts/build.mjs
+├── scripts/benchmark.mjs
 ├── src/
 │   ├── app.js               # browser workflow and safe rendering
+│   ├── benchmark.js         # deterministic demo generator and benchmark runner
 │   ├── core.js              # parser, validation, rules, ranking, export
 │   ├── index.html
 │   └── styles.css

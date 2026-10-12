@@ -8,9 +8,12 @@ import {
   serializeCsv,
   thresholdForStage,
 } from "./core.js";
+import { runBenchmarkSuite } from "./benchmark.js";
 
 const DEMO_AS_OF = "2026-10-12";
 const SAMPLE_PATH = "./sample-data/hiring_board.csv";
+const ADVERSARIAL_PATH = "./sample-data/adversarial.csv";
+const MAX_RENDERED_QUEUE = 200;
 const captureMode = new URLSearchParams(window.location.search).get("capture");
 if (["queue", "quality"].includes(captureMode)) {
   document.body.classList.add(`capture-${captureMode}`);
@@ -66,6 +69,14 @@ const dom = {
   rulesButton: document.querySelector("#rules-button"),
   rulesDialog: document.querySelector("#rules-dialog"),
   closeRules: document.querySelector("#close-rules"),
+  benchmarkGrid: document.querySelector("#benchmark-grid"),
+  benchmarkCard: document.querySelector(".benchmark-card--results"),
+  benchmarkButton: document.querySelector("#run-benchmark"),
+  benchmarkStatus: document.querySelector("#benchmark-status"),
+  benchmarkResults: document.querySelector("#benchmark-results"),
+  benchmarkMethod: document.querySelector("#benchmark-method"),
+  loadCleanDemo: document.querySelector("#load-clean-demo"),
+  loadAdversarialDemo: document.querySelector("#load-adversarial-demo"),
   toast: document.querySelector("#toast"),
   liveRegion: document.querySelector("#live-region"),
 };
@@ -264,8 +275,14 @@ function queueCard(record, rank) {
 
 function renderQueue() {
   const records = filteredQueue();
+  const visibleRecords = records.slice(0, MAX_RENDERED_QUEUE);
+  const rankByApplication = new Map(
+    state.analysis.flagged.map((record, index) => [record.applicationId, index + 1]),
+  );
   dom.queue.replaceChildren();
-  dom.queueCount.textContent = `Showing ${records.length} of ${state.analysis.flagged.length}`;
+  dom.queueCount.textContent = records.length > visibleRecords.length
+    ? `Showing first ${visibleRecords.length} of ${records.length} matches · export includes all`
+    : `Showing ${records.length} of ${state.analysis.flagged.length}`;
   dom.exportButton.disabled = records.length === 0;
 
   if (records.length === 0) {
@@ -283,8 +300,8 @@ function renderQueue() {
   }
 
   dom.emptyState.hidden = true;
-  records.forEach((record) => {
-    const overallRank = state.analysis.flagged.indexOf(record) + 1;
+  visibleRecords.forEach((record) => {
+    const overallRank = rankByApplication.get(record.applicationId);
     dom.queue.append(queueCard(record, overallRank));
   });
 }
@@ -420,15 +437,136 @@ async function loadCsvText(text, fileName, { resetDate = false } = {}) {
   runAnalysis();
 }
 
-async function loadSample() {
+async function loadBundledDemo(path, fileName, successMessage) {
   try {
-    const response = await fetch(SAMPLE_PATH);
+    const response = await fetch(path);
     if (!response.ok) throw new Error(`Sample request failed with ${response.status}`);
-    await loadCsvText(await response.text(), "hiring_board.csv", { resetDate: true });
-    showToast("Fictional sample board loaded");
+    await loadCsvText(await response.text(), fileName, { resetDate: true });
+    showToast(successMessage);
+    return true;
   } catch (error) {
     console.error(error);
-    showToast("Could not load the sample CSV");
+    showToast("Could not load the bundled demo");
+    return false;
+  }
+}
+
+async function loadSample() {
+  return loadBundledDemo(SAMPLE_PATH, "hiring_board.csv", "Fictional sample board loaded");
+}
+
+async function loadAdversarialSample() {
+  return loadBundledDemo(
+    ADVERSARIAL_PATH,
+    "adversarial.csv",
+    "Adversarial demo loaded — inspect data quality",
+  );
+}
+
+function formatMilliseconds(value) {
+  if (!Number.isFinite(value)) return "—";
+  if (value < 0.1) return "<0.1 ms";
+  if (value < 10) return `${value.toFixed(2)} ms`;
+  return `${value.toFixed(1)} ms`;
+}
+
+function renderBenchmarkResults(suite) {
+  dom.benchmarkResults.replaceChildren();
+  const number = new Intl.NumberFormat("en-US");
+
+  for (const result of suite.results) {
+    const row = document.createElement("tr");
+    const rows = element("th", "", number.format(result.rows));
+    rows.scope = "row";
+    const passed = result.correct && result.deterministic;
+    const check = element("span", `check-chip check-chip--${passed ? "pass" : "fail"}`, passed ? "PASS" : "FAIL");
+    const checkCell = document.createElement("td");
+    checkCell.append(check);
+    row.append(
+      rows,
+      element("td", "", formatMilliseconds(result.medianMs)),
+      element("td", "", formatMilliseconds(result.p95Ms)),
+      element("td", "", result.rows >= 1_000 ? number.format(result.rowsPerSecond) : "—"),
+      checkCell,
+    );
+    dom.benchmarkResults.append(row);
+  }
+
+  dom.benchmarkMethod.textContent = `${suite.warmups} warmups + ${suite.runs} measured runs per scale · generated CSV is outside the timer · queue-card rendering is excluded`;
+}
+
+let benchmarkRunning = false;
+async function runBenchmarks({ automatic = false } = {}) {
+  if (benchmarkRunning) return;
+  benchmarkRunning = true;
+  dom.benchmarkCard.setAttribute("aria-busy", "true");
+  dom.benchmarkButton.disabled = true;
+  dom.benchmarkButton.firstChild.textContent = "Running locally ";
+
+  try {
+    const suite = await runBenchmarkSuite({
+      warmups: 3,
+      runs: 15,
+      onProgress: ({ phase, size }) => {
+        const verb = phase === "warming" ? "Warming" : phase === "measuring" ? "Measuring" : "Checked";
+        dom.benchmarkStatus.textContent = `${verb} ${size.toLocaleString("en-US")} rows…`;
+      },
+      yieldControl: () => new Promise((resolve) => window.requestAnimationFrame(resolve)),
+    });
+    renderBenchmarkResults(suite);
+    const passed = suite.results.every((result) => result.correct && result.deterministic);
+    dom.benchmarkStatus.textContent = passed
+      ? "Measured in this browser · every correctness signature passed."
+      : "Benchmark completed with a correctness failure — treat timings as invalid.";
+    announce(passed ? "Engine benchmarks complete. All correctness checks passed." : "Benchmark correctness check failed.");
+    if (!automatic) showToast("Local engine benchmark complete");
+  } catch (error) {
+    console.error(error);
+    dom.benchmarkStatus.textContent = "Benchmark could not complete in this browser.";
+    announce("Engine benchmark could not complete.");
+  } finally {
+    benchmarkRunning = false;
+    dom.benchmarkCard.setAttribute("aria-busy", "false");
+    dom.benchmarkButton.disabled = false;
+    dom.benchmarkButton.firstChild.textContent = "Run again ";
+  }
+}
+
+function setupSignalSpotlights() {
+  const finePointer = window.matchMedia("(hover: hover) and (pointer: fine)").matches;
+  const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  if (!finePointer || reducedMotion) return;
+
+  let frame = null;
+  let pending = null;
+  dom.benchmarkGrid.addEventListener("pointermove", (event) => {
+    const card = event.target.closest(".signal-spotlight");
+    if (!card || !dom.benchmarkGrid.contains(card)) return;
+    pending = { card, clientX: event.clientX, clientY: event.clientY };
+    if (frame !== null) return;
+    frame = window.requestAnimationFrame(() => {
+      const rect = pending.card.getBoundingClientRect();
+      pending.card.style.setProperty("--spot-x", `${pending.clientX - rect.left}px`);
+      pending.card.style.setProperty("--spot-y", `${pending.clientY - rect.top}px`);
+      frame = null;
+    });
+  });
+}
+
+function revealQueueAfterDemo() {
+  const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  document.querySelector("#priority-queue").scrollIntoView({
+    behavior: reducedMotion ? "auto" : "smooth",
+    block: "start",
+  });
+}
+
+function scheduleBenchmarks() {
+  const start = () => runBenchmarks({ automatic: true });
+  if ("requestIdleCallback" in window) {
+    window.requestIdleCallback(start, { timeout: 2_000 });
+  } else {
+    window.setTimeout(start, 600);
   }
 }
 
@@ -541,9 +679,19 @@ function bindEvents() {
   dom.rulesDialog.addEventListener("click", (event) => {
     if (event.target === dom.rulesDialog) dom.rulesDialog.close();
   });
+
+  dom.benchmarkButton.addEventListener("click", () => runBenchmarks());
+  dom.loadCleanDemo.addEventListener("click", async () => {
+    if (await loadSample()) revealQueueAfterDemo();
+  });
+  dom.loadAdversarialDemo.addEventListener("click", async () => {
+    if (await loadAdversarialSample()) revealQueueAfterDemo();
+  });
 }
 
 dom.asOfInput.value = DEMO_AS_OF;
 dom.thresholdInput.value = String(state.baseThreshold);
 bindEvents();
-loadSample();
+setupSignalSpotlights();
+await loadSample();
+scheduleBenchmarks();

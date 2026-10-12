@@ -27,6 +27,7 @@
       </a>
       <nav class="topbar__actions" aria-label="Product controls">
         <span class="privacy-pill"><i></i> LOCAL / NO UPLOADS</span>
+        <a class="ghost-button benchmark-link" href="#evidence-lab">Benchmarks</a>
         <button id="rules-button" class="ghost-button" type="button">How it decides</button>
       </nav>
     </header>
@@ -204,6 +205,101 @@
             </button>
           </details>
         </aside>
+      </section>
+
+      <section id="evidence-lab" class="evidence-lab shell" aria-labelledby="evidence-title">
+        <div class="evidence-heading">
+          <div>
+            <p class="eyebrow"><span>PROOF SURFACE</span> / RUN IT HERE</p>
+            <h2 id="evidence-title">Evidence, not adjectives.</h2>
+          </div>
+          <p>
+            Stress the real local engine, inspect fixed demo outcomes, and see exactly what the timer includes.
+            Results are measured in this browser—no canned speed claim and no data leaves the page.
+          </p>
+        </div>
+
+        <div id="benchmark-grid" class="benchmark-grid">
+          <article class="benchmark-card benchmark-card--results signal-spotlight" aria-labelledby="benchmark-title">
+            <div class="benchmark-card__head">
+              <div>
+                <p class="label">ENGINE BENCHMARK</p>
+                <h3 id="benchmark-title">Parse → validate → rank</h3>
+              </div>
+              <button id="run-benchmark" class="solid-button solid-button--small" type="button">
+                Run on this device <span aria-hidden="true">↗</span>
+              </button>
+            </div>
+            <p id="benchmark-status" class="benchmark-status" role="status">Queued for an idle browser moment…</p>
+            <div class="benchmark-table-wrap">
+              <table class="benchmark-table">
+                <caption class="sr-only">Driftline engine benchmark results</caption>
+                <thead>
+                  <tr>
+                    <th scope="col">Rows</th>
+                    <th scope="col">Median</th>
+                    <th scope="col">P95</th>
+                    <th scope="col">Rows / sec</th>
+                    <th scope="col">Check</th>
+                  </tr>
+                </thead>
+                <tbody id="benchmark-results">
+                  <tr><th scope="row">100</th><td>—</td><td>—</td><td>—</td><td><span class="check-chip check-chip--waiting">WAIT</span></td></tr>
+                  <tr><th scope="row">1,000</th><td>—</td><td>—</td><td>—</td><td><span class="check-chip check-chip--waiting">WAIT</span></td></tr>
+                  <tr><th scope="row">10,000</th><td>—</td><td>—</td><td>—</td><td><span class="check-chip check-chip--waiting">WAIT</span></td></tr>
+                </tbody>
+              </table>
+            </div>
+            <p id="benchmark-method" class="benchmark-method">
+              3 warmups + 15 measured runs per scale · generated CSV is outside the timer · queue-card rendering is excluded
+            </p>
+          </article>
+
+          <article class="benchmark-card benchmark-card--proof signal-spotlight">
+            <p class="label">CORRECTNESS GATE</p>
+            <div class="proof-score"><strong>21</strong><span>/ 21<br />PASSING</span></div>
+            <ul class="proof-list">
+              <li><span>✓</span> Exact sample reconciliation</li>
+              <li><span>✓</span> Stable order across every run</li>
+              <li><span>✓</span> Sensitive fields ignored</li>
+              <li><span>✓</span> Formula exports neutralized</li>
+            </ul>
+            <p>Speed is only marked PASS when every generated row also reconciles correctly.</p>
+          </article>
+
+          <article class="benchmark-card benchmark-card--demo benchmark-card--clean signal-spotlight">
+            <div class="demo-card__index">A</div>
+            <p class="label">CLEAN + MESSY REALITY</p>
+            <h3>Fictional board</h3>
+            <div class="demo-equation" aria-label="18 input rows produce 9 stalled, 2 healthy, 3 terminal, and 4 invalid rows">
+              <strong>18</strong><span>ROWS</span><i>→</i><strong>9</strong><span>STALLED</span>
+            </div>
+            <p>2 healthy · 3 terminal · 4 invalid · 30 debt days</p>
+            <button id="load-clean-demo" class="outline-button" type="button">Load this demo</button>
+          </article>
+
+          <article class="benchmark-card benchmark-card--demo benchmark-card--adversarial signal-spotlight">
+            <div class="demo-card__index">B</div>
+            <p class="label">ADVERSARIAL CORPUS</p>
+            <h3>Bad input, visible</h3>
+            <div class="demo-equation" aria-label="9 input rows produce 5 stalled and 4 invalid rows">
+              <strong>9</strong><span>ROWS</span><i>→</i><strong>4</strong><span>INVALID</span>
+            </div>
+            <p>HTML remains inert · formulas neutralized · sensitive columns ignored</p>
+            <button id="load-adversarial-demo" class="outline-button" type="button">Load this demo</button>
+          </article>
+
+          <article class="benchmark-card benchmark-card--method signal-spotlight">
+            <p class="label">READ THE NUMBER HONESTLY</p>
+            <h3>What is timed?</h3>
+            <dl class="method-list">
+              <div><dt>Included</dt><dd>CSV parsing, row validation, stage-aware analysis, scoring, and deterministic sorting.</dd></div>
+              <div><dt>Excluded</dt><dd>Data generation, file reading, network time, and rendering thousands of queue cards.</dd></div>
+              <div><dt>Report</dt><dd>Median, interpolated p95, throughput, and a fixed correctness signature.</dd></div>
+            </dl>
+            <p class="method-caveat">Local benchmark, not a production-capacity claim. Timings vary by device and browser.</p>
+          </article>
+        </div>
       </section>
 
       <section class="guardrail shell" aria-label="Fairness guardrail">

@@ -10,10 +10,12 @@ const samples = resolve(projectRoot, "sample-data");
 await rm(dist, { recursive: true, force: true });
 await mkdir(resolve(dist, "sample-data"), { recursive: true });
 
-for (const file of ["index.html", "styles.css", "app.js", "core.js"]) {
+for (const file of ["index.html", "styles.css", "app.js", "core.js", "benchmark.js"]) {
   await cp(resolve(source, file), resolve(dist, file));
 }
 
-await cp(resolve(samples, "hiring_board.csv"), resolve(dist, "sample-data/hiring_board.csv"));
+for (const file of ["hiring_board.csv", "adversarial.csv"]) {
+  await cp(resolve(samples, file), resolve(dist, "sample-data", file));
+}
 
 console.log("Built static site in dist/");
