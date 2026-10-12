@@ -1,0 +1,259 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Driftline turns a hiring-board CSV into an explainable, human-reviewed follow-up queue."
+    />
+    <title>Driftline — Hiring Momentum Triage</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <a class="skip-link" href="#priority-queue">Skip to priority queue</a>
+
+    <header class="topbar">
+      <a class="brand" href="#top" aria-label="Driftline home">
+        <svg class="brand-mark" viewBox="0 0 40 40" aria-hidden="true">
+          <path d="M3 20 20 3l17 17-17 17L3 20Z" fill="currentColor" />
+          <path d="m12 20 8-8 8 8-8 8-8-8Z" fill="var(--paper)" />
+          <circle cx="20" cy="20" r="3.2" fill="currentColor" />
+        </svg>
+        <span>
+          <strong>DRIFTLINE</strong>
+          <small>HIRING MOMENTUM TRIAGE</small>
+        </span>
+      </a>
+      <nav class="topbar__actions" aria-label="Product controls">
+        <span class="privacy-pill"><i></i> LOCAL / NO UPLOADS</span>
+        <button id="rules-button" class="ghost-button" type="button">How it decides</button>
+      </nav>
+    </header>
+
+    <main id="top">
+      <section class="hero shell" aria-labelledby="hero-title">
+        <div class="hero__copy">
+          <p class="eyebrow"><span>OPS SIGNAL 01</span> / FOLLOW-UP DEBT</p>
+          <h1 id="hero-title">Find the silence <em>before</em> candidates feel it.</h1>
+          <p class="hero__lede">
+            A local-first stall alerter that turns a hiring-board CSV into an explainable queue:
+            who needs attention, why they rank here, and what a human should do next.
+          </p>
+          <div class="principle">
+            <span class="principle__number">01</span>
+            <p><strong>A check-in is not movement.</strong> Driftline measures time since the last real stage change, while contact age stays a supporting signal.</p>
+          </div>
+        </div>
+
+        <div class="hero__signal" aria-label="Driftline operating principle">
+          <div class="signal-orbit signal-orbit--outer"></div>
+          <div class="signal-orbit signal-orbit--inner"></div>
+          <div class="signal-core">
+            <span>HUMAN</span>
+            <strong>IN THE</strong>
+            <span>LOOP</span>
+          </div>
+          <p>NO AUTO-SEND<br />NO ATS WRITES<br />NO CANDIDATE SCORING</p>
+        </div>
+      </section>
+
+      <section class="control-deck shell" aria-label="Input and scenario controls">
+        <div id="drop-zone" class="drop-zone" role="button" tabindex="0" aria-label="Choose or drop a CSV file">
+          <input id="file-input" type="file" accept=".csv,text/csv" hidden />
+          <div class="drop-zone__icon" aria-hidden="true">↥</div>
+          <div class="drop-zone__copy">
+            <span class="label">BOARD INPUT</span>
+            <div class="file-status">
+              <i id="status-dot" class="status-dot"></i>
+              <strong id="file-name">Loading sample…</strong>
+            </div>
+            <small id="file-meta">Fictional data · processed in this browser</small>
+          </div>
+          <button id="upload-button" class="solid-button" type="button">Choose CSV</button>
+        </div>
+
+        <div class="scenario-controls">
+          <div class="field field--date">
+            <label for="as-of">AS-OF DATE</label>
+            <input id="as-of" type="date" />
+            <small>Keeps every result reproducible</small>
+          </div>
+          <div class="field field--range">
+            <div class="field__head">
+              <label for="threshold">BASE STAGE LIMIT</label>
+              <output id="threshold-value" for="threshold">7 days</output>
+            </div>
+            <input id="threshold" type="range" min="1" max="30" step="1" value="7" />
+            <div class="range-labels"><span>1d strict</span><span>30d forgiving</span></div>
+          </div>
+          <button id="sample-button" class="outline-button" type="button">
+            <span aria-hidden="true">↺</span> Reset sample
+          </button>
+        </div>
+
+        <div id="threshold-rail" class="threshold-rail" aria-label="Effective stage limits"></div>
+      </section>
+
+      <section class="metrics shell" aria-label="Board summary">
+        <article class="metric metric--ink">
+          <p>STALLED NOW</p>
+          <strong id="metric-stalled">—</strong>
+          <small id="metric-stalled-note">Valid active rows past their limit</small>
+          <span class="metric__index">01</span>
+        </article>
+        <article class="metric metric--coral">
+          <p>PROCESS DEBT</p>
+          <strong id="metric-debt">—</strong>
+          <small id="metric-debt-note">Calendar days beyond stage limits</small>
+          <span class="metric__index">02</span>
+        </article>
+        <article class="metric metric--acid">
+          <p>BROKEN COMMITMENTS</p>
+          <strong id="metric-promises">—</strong>
+          <small id="metric-promises-note">Recorded next steps already overdue</small>
+          <span class="metric__index">03</span>
+        </article>
+        <article class="metric metric--paper">
+          <p>DATA ISSUES</p>
+          <strong id="metric-quality">—</strong>
+          <small id="metric-quality-note">Rows that need correction</small>
+          <span class="metric__index">04</span>
+        </article>
+      </section>
+
+      <section class="workspace shell">
+        <div id="priority-queue" class="queue-panel">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow"><span>DECISION SURFACE</span> / REVIEW REQUIRED</p>
+              <h2>Follow-up queue</h2>
+            </div>
+            <div class="queue-actions">
+              <span id="queue-count" class="queue-count">Showing 0 of 0</span>
+              <button id="export-button" class="solid-button solid-button--small" type="button">
+                Export visible queue <span aria-hidden="true">↓</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="filter-bar" aria-label="Queue filters">
+            <label class="search-field">
+              <span aria-hidden="true">⌕</span>
+              <span class="sr-only">Search queue</span>
+              <input id="search" type="search" placeholder="Search name, role, ID, owner…" />
+            </label>
+            <label>
+              <span class="sr-only">Filter by stage</span>
+              <select id="stage-filter"><option value="all">All stages</option></select>
+            </label>
+            <label>
+              <span class="sr-only">Filter by owner</span>
+              <select id="owner-filter"><option value="all">All owners</option></select>
+            </label>
+            <label>
+              <span class="sr-only">Filter by waiting responsibility</span>
+              <select id="waiting-filter"><option value="all">Waiting on anyone</option></select>
+            </label>
+            <button id="clear-filters" class="text-button" type="button">Clear</button>
+          </div>
+
+          <div id="queue" class="queue" aria-live="polite"></div>
+          <div id="empty-state" class="empty-state" hidden>
+            <span aria-hidden="true">○</span>
+            <h3>No matches in the queue</h3>
+            <p>Try a different filter or a stricter base limit.</p>
+          </div>
+        </div>
+
+        <aside class="side-panel" aria-label="Process lens and data quality">
+          <section class="lens-card">
+            <div class="card-heading">
+              <div>
+                <p class="label">PROCESS LENS</p>
+                <h2>Where is work drifting?</h2>
+              </div>
+              <span class="legend"><i></i> stalled / active</span>
+            </div>
+            <div id="stage-chart" class="stage-chart"></div>
+            <p id="coverage-copy" class="coverage-copy"></p>
+          </section>
+
+          <section class="rule-card">
+            <p class="label">THE RULE, IN PLAIN LANGUAGE</p>
+            <blockquote>
+              Flag an active application when its days in stage are
+              <em>greater than or equal to</em> the visible stage limit.
+            </blockquote>
+            <div class="formula">
+              <span>DAYS IN STAGE</span>
+              <b>≥</b>
+              <span>⌈ BASE × STAGE FACTOR ⌉</span>
+            </div>
+            <p>Name, source, and demographic fields never enter the formula.</p>
+          </section>
+
+          <details id="quality-panel" class="quality-panel" open>
+            <summary>
+              <span><b>Data quality</b><small>Nothing disappears silently</small></span>
+              <mark id="quality-count">0 issues</mark>
+            </summary>
+            <div id="quality-list" class="quality-list"></div>
+            <button id="validation-button" class="outline-button outline-button--full" type="button">
+              Download validation report
+            </button>
+          </details>
+        </aside>
+      </section>
+
+      <section class="guardrail shell" aria-label="Fairness guardrail">
+        <span class="guardrail__stamp">FAIRNESS<br />BOUNDARY</span>
+        <div>
+          <p class="label">WHAT THIS NUMBER IS — AND ISN'T</p>
+          <h2>Priority describes workflow delay, not a person.</h2>
+        </div>
+        <p>
+          The index uses stage age, the applicable limit, an overdue recorded commitment, waiting responsibility, and contact age. It never predicts quality, interest, performance, or hire probability.
+        </p>
+      </section>
+    </main>
+
+    <footer class="footer shell">
+      <p><strong>DRIFTLINE / PROTOTYPE 01</strong><br />Synthetic data only. Human review is mandatory.</p>
+      <p>Deterministic rules · zero runtime AI · no network data transfer</p>
+    </footer>
+
+    <dialog id="rules-dialog" class="rules-dialog">
+      <div class="dialog-head">
+        <div>
+          <p class="eyebrow"><span>AUDIT VIEW</span> / VERSION 1</p>
+          <h2>How Driftline decides</h2>
+        </div>
+        <button id="close-rules" class="icon-button" type="button" aria-label="Close rules">×</button>
+      </div>
+      <div class="dialog-body">
+        <section>
+          <span class="step-number">01</span>
+          <div><h3>Validate first</h3><p>Required fields, ISO dates, recognized stages, waiting responsibility, future movement dates, and duplicate IDs are checked before ranking. Invalid rows stay visible.</p></div>
+        </section>
+        <section>
+          <span class="step-number">02</span>
+          <div><h3>Apply a stage-aware limit</h3><p>The base limit is multiplied by a visible stage factor and rounded up. Offer is 0.5×; assessment is 1.5×; applied, recruiter screen, and interview are 1×.</p></div>
+        </section>
+        <section>
+          <span class="step-number">03</span>
+          <div><h3>Rank the follow-up load</h3><p>Index = floor(100 × days ÷ limit) + 30 for an overdue promise + 15/8/0 for company/external/candidate responsibility + contact age capped at 20.</p></div>
+        </section>
+        <section>
+          <span class="step-number">04</span>
+          <div><h3>Keep the decision human</h3><p>Fixed templates explain the facts and suggest an action. Driftline never advances, rejects, messages, or edits a candidate record.</p></div>
+        </section>
+      </div>
+      <div class="dialog-foot"><span>Same input + same settings = same queue.</span><button class="solid-button" type="button" onclick="this.closest('dialog').close()">Understood</button></div>
+    </dialog>
+
+    <div id="toast" class="toast" role="status"></div>
+    <div id="live-region" class="sr-only" aria-live="polite"></div>
+    <script type="module" src="./app.js"></script>
+  </body>
+</html>

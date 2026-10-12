@@ -1,0 +1,19 @@
+application_id,candidate_name,role,stage,stage_entered_on,last_contact_on,next_step_due_on,owner,waiting_on
+DL-101,Asha Nair,ML Engineer,Interview,2026-09-30,2026-10-05,2026-10-09,Priya,company
+DL-102,Mateo Ruiz,Product Designer,Applied,2026-10-05,,2026-10-14,Eli,company
+DL-103,Lin Chen,Data Analyst,Recruiter Screen,2026-10-06,2026-10-10,2026-10-13,Priya,candidate
+DL-104,Jordan Lee,Sales Lead,Offer,2026-10-03,2026-10-04,2026-10-07,,company
+DL-105,Priya Shah,Backend Engineer,Rejected,2026-09-20,2026-09-22,2026-09-24,Noor,company
+DL-106,"Ana María, López","Engineer, Platform",Assessment,2026-09-28,2026-09-29,2026-10-11,Tara,candidate
+DL-107,Sam Taylor,Security Engineer,Recruiter Screen,,2026-10-10,2026-10-15,Noor,company
+DL-108,Noor Khan,Ops Analyst,Hiring Manager Review,2026-10-14,2026-10-10,2026-10-16,Priya,company
+DL-109,Alex Kim,Data Engineer,Withdrawn,2026-01-01,2026-01-08,2026-01-10,Tara,company
+DL-110,Chris Moss,QA Engineer,Recruiter Screen,2026-10-01,2026-10-03,2026-10-08,Dev,company
+DL-110,Chris Moss,QA Engineer,Interview,2026-10-08,2026-10-08,2026-10-15,Dev,company
+DL-111,Evelyn Okafor,Finance Analyst,Reference Check,2026-10-02,2026-10-10,,Mina,external
+DL-112,David Park,Mobile Engineer,Offer,2026-10-10,2026-10-11,2026-10-15,Mina,candidate
+DL-113,Zara Ahmed,Growth Lead,Hiring Manager Review,2026-10-04,,2026-10-12,Eli,company
+DL-114,Omar Haddad,UX Researcher,Assessment,2026-10-01,2026-10-08,2026-10-14,Tara,candidate
+DL-115,Mei Tan,Staff Engineer,Panel Interview,2026-09-25,2026-10-01,,Noor,company
+DL-116,Ravi Menon,Solutions Architect,Hired,2026-09-01,2026-09-07,2026-09-08,Mina,company
+DL-117,Taylor Reed,Support Lead,Recruiter Screen,2026-10-04,2026-10-11,2026-10-10,Eli,external

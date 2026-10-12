@@ -1,0 +1,239 @@
+import assert from "node:assert/strict";
+import { readFile } from "node:fs/promises";
+import { performance } from "node:perf_hooks";
+import test from "node:test";
+import {
+  analyzeBoard,
+  exportQueueCsv,
+  parseCsv,
+  parseIsoDate,
+  sanitizeSpreadsheetCell,
+  thresholdForStage,
+} from "../src/core.js";
+
+const AS_OF = parseIsoDate("2026-10-12");
+
+function row(overrides = {}) {
+  return {
+    __line: 2,
+    application_id: "APP-001",
+    candidate_name: "Asha Nair",
+    role: "Engineer",
+    stage: "Interview",
+    stage_entered_on: "2026-10-05",
+    last_contact_on: "2026-10-10",
+    next_step_due_on: "2026-10-14",
+    owner: "Priya",
+    waiting_on: "company",
+    ...overrides,
+  };
+}
+
+test("CSV parser handles a BOM, CRLF, quoted commas, escaped quotes, and Unicode", () => {
+  const csv =
+    '\uFEFFapplication_id,candidate_name,role,stage,stage_entered_on,owner,waiting_on\r\n' +
+    'APP-1,"Ana María, López","Engineer, ""Platform""",Interview,2026-10-01,Tara,company\r\n';
+  const parsed = parseCsv(csv);
+  assert.deepEqual(parsed.errors, []);
+  assert.equal(parsed.rows.length, 1);
+  assert.equal(parsed.rows[0].candidate_name, "Ana María, López");
+  assert.equal(parsed.rows[0].role, 'Engineer, "Platform"');
+});
+
+test("missing required headers and malformed field counts are visible", () => {
+  const parsed = parseCsv("application_id,candidate_name\nA-1,Asha,extra\n");
+  assert.ok(parsed.errors.some((error) => error.startsWith("Missing required column")));
+  assert.ok(parsed.errors.some((error) => error.includes("expected 2 fields but found 3")));
+});
+
+test("stage-aware limits use documented factors and round up", () => {
+  assert.equal(thresholdForStage("offer", 7), 4);
+  assert.equal(thresholdForStage("assessment", 7), 11);
+  assert.equal(thresholdForStage("hiring_manager_review", 7), 6);
+  assert.equal(thresholdForStage("interview", 7), 7);
+});
+
+test("the stall boundary is inclusive", () => {
+  const exact = analyzeBoard([row()], { asOf: AS_OF, baseThreshold: 7 });
+  const below = analyzeBoard([row({ stage_entered_on: "2026-10-06" })], {
+    asOf: AS_OF,
+    baseThreshold: 7,
+  });
+  assert.equal(exact.flagged.length, 1);
+  assert.equal(exact.flagged[0].daysInStage, 7);
+  assert.equal(below.flagged.length, 0);
+});
+
+test("recent contact does not reset the stage clock", () => {
+  const analysis = analyzeBoard(
+    [row({ stage_entered_on: "2026-09-30", last_contact_on: "2026-10-12" })],
+    { asOf: AS_OF, baseThreshold: 7 },
+  );
+  assert.equal(analysis.flagged[0].daysInStage, 12);
+  assert.equal(analysis.flagged[0].contactPoints, 0);
+});
+
+test("terminal stages are excluded even when old", () => {
+  const analysis = analyzeBoard(
+    [row({ stage: "Rejected", stage_entered_on: "2025-01-01" })],
+    { asOf: AS_OF, baseThreshold: 7 },
+  );
+  assert.equal(analysis.flagged.length, 0);
+  assert.equal(analysis.terminal.length, 1);
+});
+
+test("missing, malformed, and future movement dates become row errors", () => {
+  const analysis = analyzeBoard(
+    [
+      row({ application_id: "A", stage_entered_on: "" }),
+      row({ application_id: "B", stage_entered_on: "2026-02-30" }),
+      row({ application_id: "C", stage_entered_on: "2026-10-13" }),
+    ],
+    { asOf: AS_OF, baseThreshold: 7 },
+  );
+  assert.equal(analysis.invalid.length, 3);
+  assert.ok(analysis.invalid[0].errors.includes("stage_entered_on is required."));
+  assert.ok(analysis.invalid[1].errors.includes("stage_entered_on must use YYYY-MM-DD."));
+  assert.ok(analysis.invalid[2].errors.includes("stage_entered_on is after the as-of date."));
+});
+
+test("every row sharing a duplicate application ID is quarantined", () => {
+  const analysis = analyzeBoard(
+    [row(), row({ __line: 3, candidate_name: "Different person", stage: "Offer" })],
+    { asOf: AS_OF, baseThreshold: 7 },
+  );
+  assert.equal(analysis.active.length, 0);
+  assert.equal(analysis.invalid.length, 2);
+  assert.ok(analysis.invalid.every((item) => item.errors.some((error) => error.includes("duplicated 2 times"))));
+});
+
+test("priority index equals its visible components", () => {
+  const analysis = analyzeBoard(
+    [
+      row({
+        stage: "Offer",
+        stage_entered_on: "2026-10-06",
+        last_contact_on: "2026-10-08",
+        next_step_due_on: "2026-10-10",
+      }),
+    ],
+    { asOf: AS_OF, baseThreshold: 7 },
+  );
+  const record = analysis.flagged[0];
+  assert.equal(record.thresholdDays, 4);
+  assert.equal(record.agePoints, 150);
+  assert.equal(record.promisePoints, 30);
+  assert.equal(record.responsibilityPoints, 15);
+  assert.equal(record.contactPoints, 4);
+  assert.equal(record.priorityScore, 199);
+  assert.equal(
+    record.priorityScore,
+    record.agePoints + record.promisePoints + record.responsibilityPoints + record.contactPoints,
+  );
+});
+
+test("a due date today is not overdue", () => {
+  const analysis = analyzeBoard(
+    [row({ next_step_due_on: "2026-10-12" })],
+    { asOf: AS_OF, baseThreshold: 7 },
+  );
+  assert.equal(analysis.flagged[0].promiseOverdue, false);
+  assert.equal(analysis.flagged[0].promisePoints, 0);
+});
+
+test("ranking is independent of input order and breaks final ties by application ID", () => {
+  const rows = [
+    row({ application_id: "APP-C" }),
+    row({ application_id: "APP-A" }),
+    row({ application_id: "APP-B" }),
+  ];
+  const forward = analyzeBoard(rows, { asOf: AS_OF, baseThreshold: 7 });
+  const reverse = analyzeBoard([...rows].reverse(), { asOf: AS_OF, baseThreshold: 7 });
+  assert.deepEqual(
+    forward.flagged.map((record) => record.applicationId),
+    ["APP-A", "APP-B", "APP-C"],
+  );
+  assert.deepEqual(
+    reverse.flagged.map((record) => record.applicationId),
+    forward.flagged.map((record) => record.applicationId),
+  );
+});
+
+test("name, role, and ignored sensitive fields cannot change operational scores", () => {
+  const first = analyzeBoard(
+    [row({ candidate_name: "Person One", role: "Role A", gender: "x" })],
+    { asOf: AS_OF, baseThreshold: 7 },
+  ).flagged[0];
+  const second = analyzeBoard(
+    [row({ candidate_name: "Completely Different", role: "Role B", gender: "y" })],
+    { asOf: AS_OF, baseThreshold: 7 },
+  ).flagged[0];
+  assert.equal(first.priorityScore, second.priorityScore);
+  assert.equal(first.daysInStage, second.daysInStage);
+  assert.equal(first.action, second.action);
+});
+
+test("every flagged row gets one deterministic explanation and action", () => {
+  const record = analyzeBoard([row()], { asOf: AS_OF, baseThreshold: 7 }).flagged[0];
+  assert.ok(record.explanation.startsWith("Asha Nair has been in Interview for 7 calendar days"));
+  assert.ok(record.explanation.endsWith("."));
+  assert.ok(record.action.length > 20);
+});
+
+test("spreadsheet formula prefixes are neutralized in exports", () => {
+  assert.equal(sanitizeSpreadsheetCell("=2+2"), "'=2+2");
+  assert.equal(sanitizeSpreadsheetCell("+SUM(A1)"), "'+SUM(A1)");
+  const record = analyzeBoard([row({ candidate_name: "=2+2" })], {
+    asOf: AS_OF,
+    baseThreshold: 7,
+  }).flagged[0];
+  const csv = exportQueueCsv([record]);
+  assert.ok(csv.includes("'=2+2"));
+});
+
+test("raising the base limit cannot increase the flagged set", () => {
+  const rows = [
+    row({ application_id: "A", stage_entered_on: "2026-10-10" }),
+    row({ application_id: "B", stage_entered_on: "2026-10-05" }),
+    row({ application_id: "C", stage_entered_on: "2026-09-20" }),
+  ];
+  const strict = analyzeBoard(rows, { asOf: AS_OF, baseThreshold: 3 });
+  const forgiving = analyzeBoard(rows, { asOf: AS_OF, baseThreshold: 10 });
+  assert.ok(forgiving.flagged.length <= strict.flagged.length);
+  assert.ok(
+    forgiving.flagged.every((record) =>
+      strict.flagged.some((strictRecord) => strictRecord.applicationId === record.applicationId),
+    ),
+  );
+});
+
+test("the fictional board reconciles to known counts and ordering", async () => {
+  const text = await readFile(new URL("../sample-data/hiring_board.csv", import.meta.url), "utf8");
+  const parsed = parseCsv(text);
+  const analysis = analyzeBoard(parsed.rows, { asOf: AS_OF, baseThreshold: 7 });
+  assert.deepEqual(parsed.errors, []);
+  assert.deepEqual(analysis.summary, {
+    inputRows: 18,
+    flagged: 9,
+    healthy: 2,
+    terminal: 3,
+    invalid: 4,
+    processDebt: 30,
+    overdueCommitments: 4,
+    waitingOnCompany: 5,
+    owners: 6,
+  });
+  assert.equal(analysis.flagged[0].applicationId, "DL-104");
+  assert.equal(analysis.flagged.at(-1).applicationId, "DL-114");
+});
+
+test("10,000 valid rows analyze within the prototype performance budget", () => {
+  const rows = Array.from({ length: 10_000 }, (_, index) =>
+    row({ application_id: `LOAD-${String(index).padStart(5, "0")}` }),
+  );
+  const started = performance.now();
+  const analysis = analyzeBoard(rows, { asOf: AS_OF, baseThreshold: 7 });
+  const elapsed = performance.now() - started;
+  assert.equal(analysis.flagged.length, 10_000);
+  assert.ok(elapsed < 2_000, `Expected <2,000 ms; received ${elapsed.toFixed(1)} ms`);
+});
