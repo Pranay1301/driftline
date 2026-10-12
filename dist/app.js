@@ -440,11 +440,29 @@ async function loadCsvText(text, fileName, { resetDate = false } = {}) {
   runAnalysis();
 }
 
+function resetDemoScenario() {
+  state.baseThreshold = 7;
+  state.asOf = DEMO_AS_OF;
+  state.search = "";
+  state.stage = "all";
+  state.owner = "all";
+  state.waiting = "all";
+
+  dom.asOfInput.value = DEMO_AS_OF;
+  dom.thresholdInput.value = "7";
+  dom.searchInput.value = "";
+  dom.stageFilter.value = "all";
+  dom.ownerFilter.value = "all";
+  dom.waitingFilter.value = "all";
+}
+
 async function loadBundledDemo(path, fileName, successMessage) {
   try {
     const response = await fetch(path);
     if (!response.ok) throw new Error(`Sample request failed with ${response.status}`);
-    await loadCsvText(await response.text(), fileName, { resetDate: true });
+    const text = await response.text();
+    resetDemoScenario();
+    await loadCsvText(text, fileName);
     showToast(successMessage);
     return true;
   } catch (error) {

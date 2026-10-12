@@ -1,199 +1,103 @@
-# Driftline — Five-Day Build Log
+# Driftline - Five-Day Calendar Log
 
-## Honesty note
+## Timeline disclosure
 
-This assignment was built in five deliberate work passes during one AI-assisted sprint on **12 October 2026**, not over five elapsed calendar days. I am keeping the required Day 1–Day 5 structure because each pass raised a distinct load. I am not inventing future dates or claiming pauses that did not happen. The compressed timeline is itself part of the AI-first experiment.
+Work began on **12 October 2026**. Everything currently completed happened on that calendar day in five build passes. Those passes are recorded under Day 1 below; they are **not** five elapsed days. Days 2-5 remain planned until their dated experiments are actually performed. Planned entries are not evidence and must not be marked complete or backdated.
 
-Each entry separates what AI proposed from what I checked and decided.
+| Calendar day | Date | Honest status |
+|---|---|---|
+| Day 1 | 2026-10-12 | COMPLETE - five build passes |
+| Day 2 | 2026-10-13 | PLANNED - NOT YET EVIDENCE |
+| Day 3 | 2026-10-14 | PLANNED - NOT YET EVIDENCE |
+| Day 4 | 2026-10-15 | PLANNED - NOT YET EVIDENCE |
+| Day 5 | 2026-10-16 | PLANNED - NOT YET EVIDENCE |
 
-## Day 1 — Define before generating
+## Day 1 - 2026-10-12 - COMPLETE
 
-**Status:** Complete work pass  
-**Load attempted:** Make “stalled,” “priority,” and “done” falsifiable before implementation.
+### Pass 1 - Define before generating
 
-### Intended outcome
+**Load:** Make stalled, priority, and done falsifiable before implementation.
 
-Choose one assignment format, bound the decision, define non-goals, and write an initial acceptance contract.
-
-### AI use
-
-- I split the brief into three bounded critiques: product architecture, submission narrative, and adversarial QA.
-- AI proposed a stage-aware hiring stall alerter, a deterministic score, a local browser workflow, and a hostile-data matrix.
-- I accepted the core idea that a check-in does not reset stage movement.
+- AI proposed a stage-aware hiring stall alerter, deterministic ranking, local browser workflow, and hostile-data matrix.
+- I accepted the idea that a check-in does not reset stage movement.
 - I rejected runtime free-form generation and candidate-quality inference because neither was needed to answer the operational question safely.
+- I mapped every required option-C behavior to a visible interface behavior or test and checked that each ranking input could be explained from the CSV.
 
-### Checks
+**What changed:** I moved AI into specification attack instead of asking it to implement a vague idea. The shipped runtime remained deterministic.
 
-- Mapped every requested behavior in option C to one visible interface or test.
-- Checked that every ranking input could be explained from the CSV.
+**Evidence:** `docs/intent.md`, the schema, stage-factor table, non-goals, and acceptance list.
 
-### What broke or surprised me
+### Pass 2 - Attack the rules
 
-The easiest-sounding model—“oldest candidate first”—was not neutral. It ignored stage urgency, explicit commitments, and responsibility while still looking objective.
+**Load:** Boundaries, terminal stages, malformed dates, quoted commas, Unicode, sensitive extras, duplicates, unknown values, and contradictory dates.
 
-### Decision and unlearning
-
-I moved AI earlier, into specification attack, instead of asking it to code a vague idea. The shipped runtime would be deterministic; AI would widen and challenge the build process.
-
-### Evidence
-
-`docs/intent.md`, schema, stage-factor table, non-goals, acceptance list.
-
-### Next load
-
-Make clean-looking sample data fail in explicit ways.
-
-## Day 2 — Attack the rules
-
-**Status:** Complete work pass  
-**Load attempted:** Boundaries, terminal stages, malformed dates, quoted commas, Unicode, sensitive extras, and duplicates.
-
-### Intended outcome
-
-Build the CSV/parser contract and adversarial fixtures before trusting the ranking.
-
-### AI use
-
-- Prompt summary: “Red-team a hiring-board stall alerter; look for silent drops, fairness errors, unstable ties, prompt injection, HTML, and spreadsheet injection.”
+- Prompt summary reconstructed from the work record: ask AI to red-team silent drops, fairness errors, unstable ties, prompt injection, HTML, and spreadsheet injection.
 - AI proposed exact-threshold, future-date, duplicate-ID, terminal-stage, quoted-comma, and formula-prefix cases.
-- I accepted visible quarantine of every duplicate rather than silently keeping one.
-- I constrained dates to `YYYY-MM-DD` rather than pretending to handle ambiguous timestamps and time zones.
+- I accepted visible quarantine of every duplicate instead of silently keeping one.
+- I constrained dates to `YYYY-MM-DD` rather than pretending to support ambiguous timestamps.
+- Post-review tests cover one day below, exactly at, and one day above the limit for fast, standard, and slow stages. Empty input, duplicate headers, invalid stages, invalid responsibility values, malformed optional dates, and a due date before stage entry are also checked.
 
-### Checks
+**What broke:** The first fictional CSV encoded terminal outcomes in `waiting_on` while leaving active stages. Inspection caught the schema error before it became a misleading edge case.
 
-- Parsed BOM, CRLF, quoted commas, escaped quotes, and Unicode.
-- Verified below-threshold, exact-threshold, future, invalid, terminal, and duplicate rows.
+**Evidence:** `sample-data/hiring_board.csv`, `sample-data/adversarial.csv`, and `tests/core.test.mjs`.
 
-### What broke or surprised me
+### Pass 3 - Make priority auditable
 
-My first fictional CSV encoded `rejected` and `withdrawn` in the `waiting_on` column while leaving active interview/applied stages. Inspection caught the schema mistake before it became a misleading “edge case.”
+**Load:** Visible arithmetic, deterministic ties, fairness invariants, and a fixed sample oracle.
 
-### Decision and unlearning
+- AI proposed an uncapped normalized stage-age term so an old early-stage case could not be starved by smaller bonuses.
+- I accepted documented bonuses for an overdue commitment, responsibility, and contact age.
+- I kept names and roles outside the score and action.
+- I rejected probability, candidate-risk, and recruiter-performance inferences.
 
-I stopped treating sample data as decoration. It became a test oracle with a reconciliation equation.
+**What broke:** A milestone test run failed 16/17 because I expected seven distinct queue owners while the program reported six. Manual inspection showed six was correct because owners repeated. I corrected the oracle, not the implementation. The 17/17 result is a historical milestone, not the final release count.
 
-### Evidence
+**Evidence:** score-component assertions, input-order invariance, identity-field invariance, and fixed-sample reconciliation in `tests/core.test.mjs`.
 
-`sample-data/hiring_board.csv`, `sample-data/adversarial.csv`, parser and validation tests.
+### Pass 4 - Test the human workflow
 
-### Next load
+**Load:** Browser interaction, sensitivity, filtering, explanations, validation, responsive layout, and export consistency.
 
-Make every ranking component auditable and try to disprove the expected total.
+- Verified the sample at base 7 produces 9 queue rows and base 10 produces 5.
+- Inspected Jordan's visible arithmetic: `225 + 30 + 15 + 8 = 278`.
+- Verified imported HTML stays inert and spreadsheet-formula prefixes are neutralized.
+- Browser reading exposed “against a 11-day limit”; I corrected it to “against the 11-day limit.”
+- A stale service worker captured a common local port, proving that HTTP success did not prove the correct app was visible. Driftline moved to port 8765.
+- Post-review browser audit covered 390, 500, 821, 1180, and 1440 pixel widths with no horizontal overflow and no console warnings or errors.
+- Post-review audit also found two product bugs: filtered export ranks were renumbered, and demo loaders retained stale controls. Both received regression tests and fixes.
 
-## Day 3 — Make priority auditable
+**Evidence:** browser checks, responsive-width records in `docs/final-evidence.json`, inspected export, and frontend/core regression tests.
 
-**Status:** Complete work pass  
-**Load attempted:** Visible score arithmetic, deterministic ties, fairness invariants, and a fixed sample oracle.
+### Pass 5 - Try to disprove done
 
-### Intended outcome
+**Load:** Scale, packaging, public access, reproducibility, honest cuts, and evidence consistency.
 
-Turn valid active rows into a stable queue where the displayed index can be recalculated by hand.
+- Ran the final suite and benchmark from one source state and recorded one canonical snapshot in `docs/final-evidence.json`.
+- Verified anonymous access to the public URL returns Driftline with HTTP 200 and no redirect.
+- Added evidence-drift checks so stale test and benchmark figures fail the suite.
+- Preserved explicit limits: calendar days, fixed stage taxonomy, browser memory, 2 MB UI limit, no ATS sync, authentication, automatic messaging, or production-readiness claim.
+- Corrected the submission story instead of hiding the fact that only one calendar day has elapsed.
 
-### AI use
+**Final Day-1 evidence:** `npm test` and `npm run benchmark` results are copied from `docs/final-evidence.json`; that manifest is the only numeric source of truth.
 
-- AI proposed an uncapped normalized stage-age term so an old early-stage case could not be starved by late-stage bonuses.
-- I accepted small documented bonuses for an overdue recorded promise, waiting responsibility, and contact age.
-- I kept names and roles outside the score and actions.
-- I rejected any generated probability, “candidate risk,” or performance inference.
+**Manual dependency:** record/upload the final five-minute demo to Loom and paste the authenticated share link.
 
-### Checks
+## Day 2 - 2026-10-13 - PLANNED, NOT YET EVIDENCE
 
-- Hand oracle: `150 + 30 + 15 + 4 = 199` for a six-day Offer case against a four-day limit.
-- Tested input-order invariance, application-ID tie-breaking, prohibited-field invariance, and component-sum equality.
-- Ran the full fixed-sample reconciliation.
+From a clean copy, rerun the exact/below/above threshold matrix across multiple stages. Record the actual commands, output, any disagreement, and resulting change. Do not replace this section with a completed entry before the work happens on this date.
 
-### What broke or surprised me
+## Day 3 - 2026-10-14 - PLANNED, NOT YET EVIDENCE
 
-The first test run failed 16/17. The code reported six distinct queue owners; my expected value said seven. Manual inspection showed six was correct because several rows shared Eli and Tara. The test oracle—not the implementation—was wrong.
+Run the malformed, contradictory, duplicate, HTML, formula, and sensitive-field corpus again. Inspect both the validation report and queue export. Record actual failures and decisions only.
 
-### Decision and unlearning
+## Day 4 - 2026-10-15 - PLANNED, NOT YET EVIDENCE
 
-Expected values deserve review too. A red test is evidence of disagreement, not automatic proof that the generated code is at fault.
+Perform the browser workflow in a fresh session: upload, threshold change, each filter, search, rank explanation, full filtered export, keyboard use, reduced-motion behavior, and narrow viewport. Record the tested browser and widths.
 
-### Evidence
+## Day 5 - 2026-10-16 - PLANNED, NOT YET EVIDENCE
 
-Failed owner-count assertion, corrected fixed-sample test, 17/17 final pass.
+Verify anonymous public access, reproduce the README from a clean start, run the synchronized final test/benchmark snapshot, audit every submitted number, record the final video, and freeze the release. Mark complete only after these actions occur on this date.
 
-### Next load
+## Inspectable AI-use receipts
 
-Test whether a human can understand and challenge the queue, not merely whether functions return values.
-
-## Day 4 — Test the human workflow
-
-**Status:** Complete work pass  
-**Load attempted:** Browser interaction, sensitivity, filtering, explanation audit, validation, and export consistency.
-
-### Intended outcome
-
-Make the product legible enough for a five-minute demo and difficult to misread as candidate scoring.
-
-### AI use
-
-- AI helped structure the interface around “who, why, next action,” then a side panel for process debt and invalid rows.
-- I used AI to critique ambiguous labels and over-automation.
-- I retained a bold editorial visual language but kept every control keyboard-labelled and every imported cell rendered as text.
-
-### Checks
-
-- Browser sample: 9 queue rows at base 7.
-- Offer filter: 1 visible row.
-- Search “Mei”: 1 visible row.
-- Base 10: 5 visible rows; restored to 7: 9 rows.
-- Score drawer for Jordan: `225 + 30 + 15 + 8 = 278`.
-- Exported nine rows in visible order and inspected the first records.
-- Current Driftline page produced no console warnings or errors.
-
-### What broke or surprised me
-
-Two human-facing defects escaped the unit tests. A stale service worker from another local app hijacked the common port 4173, so I moved Driftline to 8765. Browser reading also exposed “against a 11-day limit”; I changed the template to “against the 11-day limit” and tightened a repeated “then” in one action.
-
-### Decision and unlearning
-
-Correct arithmetic does not guarantee a trustworthy interface. Visual reading and a real browser found problems function tests could not.
-
-### Evidence
-
-Browser screenshots, sensitivity counts, rules dialog, inspected export, revised explanation template.
-
-### Next load
-
-Try to disprove “done” with scale, clean-start documentation, limitations, and claim-by-claim evidence.
-
-## Day 5 — Try to disprove done
-
-**Status:** Complete work pass with explicit submission dependency  
-**Load attempted:** Scale, packaging, reproducibility, honest cuts, and demo rehearsal.
-
-### Intended outcome
-
-Freeze the directive only after code, tests, browser behavior, export, documentation, and narrative agree.
-
-### AI use
-
-- AI reviewed the final contract against the assignment rubric and helped separate shipped evidence from aspirational language.
-- I used AI to draft a narrated walkthrough, then grounded every number in the test/browser results.
-- I did not let the final narrative imply ATS integration, automated messaging, mobile test coverage, or production readiness.
-
-### Checks
-
-- `npm test`: 17 passed, 0 failed.
-- 10,000 valid rows: about 28 ms on this machine, below the two-second prototype budget.
-- `npm run build`: static site produced successfully.
-- README commands checked against the actual package scripts.
-- Default export inspected against the visible queue.
-
-### What broke or surprised me
-
-Automated mobile-viewport control was unavailable, so I did not claim a mobile browser pass; only responsive CSS is included. The generated MP4 uses synthetic narration, and creating the Loom share link still requires an authenticated account upload.
-
-### Decision and unlearning
-
-“Done” now means claims with evidence plus named limits. It does not mean hiding the last manual step.
-
-### Evidence
-
-`README.md`, `docs/Final directive.md`, final test output, `docs/demo-script.md`, submission package.
-
-### Next load
-
-Manual account step: upload the MP4 to Loom, paste the returned link into the submission form, and do a final reviewer-perspective playback before submitting.
+See `docs/ai-evidence.md`. It separates retained instructions from reconstructed prompt summaries and records what AI proposed, how the proposal was checked, and what changed.

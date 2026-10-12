@@ -1,8 +1,8 @@
 # Driftline — Final Directive
 
 **Status:** Frozen build contract  
-**Frozen:** 2026-10-12, 15:05 IST  
-**Implementation:** submission archive v1.0.0
+**Evidence snapshot:** `driftline-2026-10-12T19:57:35+05:30`
+**Implementation:** post-review release candidate
 
 Build and verify Driftline as a browser-based, local-first hiring-board stall alerter. It turns a CSV into an auditable follow-up queue and must never present its output as a judgment of candidate quality.
 
@@ -32,7 +32,7 @@ Recognize the documented stage aliases and normalize them to:
 
 `applied`, `recruiter_screen`, `hiring_manager_review`, `assessment`, `interview`, `reference_check`, `offer`, `hired`, `rejected`, `withdrawn`.
 
-Never silently drop malformed data. Structural CSV errors appear in the quality panel. Rows with bad or missing values, future movement dates, unknown values, or duplicate IDs are quarantined visibly. Every occurrence of a duplicate ID is invalid.
+Never silently drop malformed data. Structural CSV errors appear in the quality panel. Rows with bad or missing values, future movement dates, a next-step date before stage entry, unknown values, or duplicate IDs are quarantined visibly. Every occurrence of a duplicate ID is invalid.
 
 ## 3. Date and stage rules
 
@@ -122,21 +122,24 @@ Distinctly surface no-stall, no-filter-match, invalid-data, and successfully rec
 
 ## 9. Export
 
-Export the visible filtered queue in its displayed order with:
+Export the complete visible filtered queue in its displayed order with the same global ranks displayed on its cards. Filtering may therefore leave intentional rank gaps.
+
+Columns:
 
 `rank,application_id,candidate_name,role,stage,owner,waiting_on,days_in_stage,threshold_days,days_over_limit,priority_score,explanation,recommended_action`
 
 ## 10. Acceptance evidence
 
 - Automated command: `npm test`
-- Result: 17/17 passing, 0 failing
+- Result: 34/34 passing, 0 failing
 - Fixed sample: 18 input = 9 stalled + 2 healthy active + 3 terminal + 4 invalid
 - Process debt: 30 calendar days
 - Manual score oracle: Offer at 6 days with a 4-day limit, 2-day overdue promise, company wait, and 4-day contact age = `150 + 30 + 15 + 4 = 199`
 - Sensitivity: base 7 shows 9 rows; base 10 shows 5
-- Export: 9 visible rows in the same order as the default queue
-- Performance: 10,000 valid rows in about 28 ms on the build machine, below the 2-second prototype budget
-- Browser: sample, filters, score drawer, rules dialog, quality panel, export, and current-page console checked at 1440×900
+- Export: all filtered matches in displayed order with displayed global ranks preserved
+- Performance: repeatable parse + validation + ranking benchmark at 10,000 rows: 49.49 ms median / 146.99 ms p95, correctness PASS; 5 warmups and 25 measured runs on Apple M2 / 8 GB / macOS 26.5.1 / Node 24.21.0
+- Browser: sample reset, upload path, threshold and filters, score drawer, rules, quality panel, adversarial demo, and export checked; viewport audit passed at 390, 500, 821, 1180, and 1440 CSS pixels without horizontal overflow or console warnings/errors
+- Source of truth: `docs/final-evidence.json`; full method and limitations: `docs/benchmark-report.md`
 
 ## 11. Definition of done
 
@@ -148,7 +151,7 @@ The assignment build is done when the README reproduces the run, tests pass, sam
 - Fixed stage taxonomy and factors.
 - No authentication, persistence, ATS sync, collaboration, localization, or production security/privacy review.
 - Uploaded data vanishes on refresh.
-- Desktop browser behavior is manually verified; responsive CSS exists, but automated mobile-viewport testing was unavailable.
+- Automated viewport checks covered 390-1440 CSS pixels, but no physical-device or full assistive-technology audit was performed.
 - The runtime intentionally uses deterministic rules, not an LLM.
 - The Loom upload is an account action outside the code artifact and remains a manual submission step.
 
@@ -160,3 +163,5 @@ The assignment build is done when the README reproduces the run, tests pass, sam
 | A hand-written expected result was enough for sample reconciliation | The first fixed-sample test expected seven owners; inspection proved there were six | Correct the oracle, keep the failed test in the log, and automate reconciliation |
 | A generated sentence that looked fluent was acceptable | Browser review exposed “against a 11-day limit” | Use “against the N-day limit” and preserve the failure as evidence |
 | Port 4173 was a safe local default | An old service worker from another app redirected that origin | Use port 8765 and verify the exact served page |
+| A filtered export could renumber the queue from one | Browser comparison found cards 01, 02, 03, 06, 08 exported as 1-5 | Attach global rank after sorting and preserve it through filtering and export |
+| Loading a demo only needed to replace the CSV | A 10-day threshold and active filters survived the reset, contradicting the demo's 9-row proof | Reset date, base limit, search, and every filter before analyzing a bundled demo |

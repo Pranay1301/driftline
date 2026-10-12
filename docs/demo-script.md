@@ -36,8 +36,10 @@ The generated narrated MP4 follows these beats and expands each section slightly
 
 ## 4:25–4:50 — Evidence
 
-“Seventeen automated tests pass. They cover parsing, exact threshold boundaries, terminal stages, bad dates, duplicate quarantine, deterministic ties, fairness invariance, export safety, sample reconciliation, and ten thousand rows. Browser checks covered filters, a nine-to-five sensitivity change, score disclosure, validation, and export.”
+“The canonical release snapshot has 34/34 automated tests passing. They cover parsing, multi-stage boundary conditions, contradictory and duplicate data, deterministic ties, identity-field invariance, safe rendering, formula-safe export, reset behavior, and global export ranks. The repeatable 10,000-row engine benchmark measured 49.49 ms median and 146.99 ms p95 with correctness passing. Browser checks covered 390 through 1440 CSS pixels, filters, the nine-to-five sensitivity change, score disclosure, validation, and export.”
 
 ## 4:50–5:05 — Honest close
 
-“The limits are deliberate and documented: calendar days only, fixed stage factors, no ATS sync, no automatic messages, and no production security claim. What I unlearned is that AI-first does not remove judgment. It makes the generate-and-challenge loop faster, while evidence earns every important claim.”
+“The limits are deliberate and documented: calendar days only, fixed stage factors, no ATS sync, no automatic messages, and no production security claim. The build has five passes but only one completed calendar day; future days are not backdated. What I unlearned is that AI-first does not remove judgment. It makes the generate-and-challenge loop faster, while evidence earns every important claim.”
+
+Release evidence ID: `driftline-2026-10-12T19:57:35+05:30`. Final snapshot: **34/34** tests; 10,000 rows at **49.49 ms** median / **146.99 ms** p95, correctness PASS.

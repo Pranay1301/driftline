@@ -298,6 +298,9 @@ function validateRow(row, asOf) {
     futureAllowed: true,
   });
   if (due.error) rowErrors.push(due.error);
+  if (!due.error && entered.date && due.date && due.date < entered.date) {
+    rowErrors.push("next_step_due_on is before stage_entered_on.");
+  }
 
   return {
     errors: rowErrors,
@@ -400,7 +403,10 @@ export function analyzeBoard(rows, options = {}) {
     active.push(record);
   }
 
-  const flagged = active.filter((record) => record.stalled).sort(compareRank);
+  const flagged = active
+    .filter((record) => record.stalled)
+    .sort(compareRank)
+    .map((record, index) => ({ ...record, rank: index + 1 }));
   const healthy = active.filter((record) => !record.stalled).sort(compareRank);
   const processDebt = flagged.reduce((sum, record) => sum + record.daysOverLimit, 0);
   const overdueCommitments = flagged.filter((record) => record.promiseOverdue).length;
@@ -463,7 +469,7 @@ export function exportQueueCsv(flagged) {
     "recommended_action",
   ];
   const rows = flagged.map((record, index) => ({
-    rank: index + 1,
+    rank: record.rank ?? index + 1,
     application_id: record.applicationId,
     candidate_name: record.candidateName,
     role: record.role,

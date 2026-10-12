@@ -36,7 +36,7 @@ To run the automated checks:
 npm test
 ```
 
-Expected result: **25 passing tests**.
+Expected result: **34/34 passing tests**.
 
 To run the repeatable local engine benchmark:
 
@@ -60,7 +60,7 @@ The fictional sample loads automatically with:
 - 30 days of process debt
 - 4 overdue next-step commitments
 
-Change the base limit to 10 days and the queue drops from 9 to 5. Use the stage, owner, responsibility, and search filters; open **Why this rank** to inspect every score component; then export the visible queue.
+Change the base limit to 10 days and the queue drops from 9 to 5. This is the **sensitivity check**: change one policy setting and confirm that the result changes predictably. Use the stage, owner, responsibility, and search filters; open **Why this rank** to inspect every score component; then export the visible queue. Export preserves the global ranks shown on the cards, even when filters leave gaps such as 01, 03, and 08.
 
 ## CSV contract
 
@@ -150,6 +150,7 @@ Driftline makes data problems visible instead of silently dropping them:
 
 - missing or malformed required values
 - future stage movement dates
+- a recorded next step dated before stage entry
 - unknown stages
 - unknown `waiting_on` values
 - conflicting duplicate application IDs (every duplicate row is quarantined)
@@ -183,22 +184,24 @@ Use synthetic data for public demos. This prototype has no authentication, persi
 - an adversarial corpus with inert HTML, spreadsheet-formula protection, duplicate quarantine, and ignored sensitive columns
 - deterministic benchmark generation and percentile math
 - a 10,000-row analysis performance budget
+- global displayed rank preservation in filtered exports
+- demo reset behavior and safe browser rendering paths
 
 ### Repeatable engine benchmark
 
 `npm run benchmark` creates deterministic synthetic CSV text once, then measures the real **CSV parse + validation + ranking** path. It uses 5 warmups and 25 measured runs per scale, keeps outliers, and reports the median, interpolated p95, throughput, and a correctness result.
 
-Reference run on the build machine:
+Canonical release snapshot (`docs/final-evidence.json`), captured 2026-10-12 at 19:57:35 IST on Apple M2 / 8 GB / macOS 26.5.1 / Node 24.21.0:
 
 | Rows | Median | P95 | Rows / second | Correctness |
 |---:|---:|---:|---:|---:|
-| 100 | 0.36 ms | 0.55 ms | 276,434 | PASS |
-| 1,000 | 3.16 ms | 3.96 ms | 316,568 | PASS |
-| 10,000 | 34.92 ms | 44.71 ms | 286,346 | PASS |
+| 100 | 0.40 ms | 0.79 ms | 250,313 | PASS |
+| 1,000 | 4.43 ms | 7.55 ms | 225,613 | PASS |
+| 10,000 | 49.49 ms | 146.99 ms | 202,078 | PASS |
 
 Data generation, file reading, and DOM rendering are outside the timer. These numbers demonstrate the prototype engine on one machine; they are not a production-capacity claim. Browser values vary and are intentionally measured again on each device.
 
-Manual browser checks verify the sample load, adversarial demo, filters, 7→10-day sensitivity (9→5 rows), score breakdown, decision-rules dialog, data-quality panel, benchmark rerun, responsive layout, CSV export, and current-page console state.
+The same release snapshot records **34/34** tests passing. Browser checks verify the sample load, adversarial demo, filters, 7→10-day sensitivity (9→5 rows), score breakdown, decision-rules dialog, data-quality panel, benchmark rerun, CSV export, and current-page console state. Automated viewport control passed at 390, 500, 821, 1180, and 1440 CSS pixels with no horizontal overflow or console warnings/errors. No physical-device or full assistive-technology audit was performed.
 
 ## Visual enhancement
 
@@ -223,6 +226,8 @@ driftline/
 │   ├── index.html
 │   └── styles.css
 ├── tests/core.test.mjs
+├── tests/evidence.test.mjs
+├── tests/frontend.test.mjs
 └── package.json
 ```
 
@@ -234,7 +239,7 @@ driftline/
 - Files above 2 MB are rejected by the interface.
 - No ATS sync, collaboration, sign-in, automatic messages, or persistence.
 - The runtime is deterministic and intentionally has no LLM; AI was used in the build-and-check process documented in `docs/five-day-log.md`.
-- Desktop browser behavior was manually verified; responsive CSS is included, but an automated mobile viewport was not available in this build environment.
+- Browser viewport automation covered 390-1440 CSS pixels, but no physical-device or full assistive-technology audit was performed.
 
 ## Human-review boundary
 

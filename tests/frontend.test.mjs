@@ -33,3 +33,41 @@ test("pointer enhancements are gated and motion fallbacks are present", () => {
 test("markup contains no inline event handlers", () => {
   assert.doesNotMatch(html, /\son[a-z]+\s*=/i);
 });
+
+test("CSV-backed UI rendering avoids executable HTML sinks", () => {
+  assert.doesNotMatch(
+    app,
+    /\.innerHTML\s*=|\.outerHTML\s*=|insertAdjacentHTML\s*\(|document\.write\s*\(|createContextualFragment\s*\(/,
+  );
+  assert.match(app, /node\.textContent = text;/);
+});
+
+test("bundled demos restore the documented baseline before analysis", () => {
+  const resetStart = app.indexOf("function resetDemoScenario() {");
+  const loaderStart = app.indexOf("async function loadBundledDemo(");
+  const loaderEnd = app.indexOf("async function loadSample()", loaderStart);
+  assert.ok(resetStart >= 0);
+  assert.ok(loaderStart > resetStart);
+  assert.ok(loaderEnd > loaderStart);
+
+  const reset = app.slice(resetStart, loaderStart);
+  assert.match(reset, /state\.baseThreshold = 7;/);
+  assert.match(reset, /state\.asOf = DEMO_AS_OF;/);
+  assert.match(reset, /state\.search = "";/);
+  assert.match(reset, /state\.stage = "all";/);
+  assert.match(reset, /state\.owner = "all";/);
+  assert.match(reset, /state\.waiting = "all";/);
+  assert.match(reset, /dom\.thresholdInput\.value = "7";/);
+  assert.match(reset, /dom\.searchInput\.value = "";/);
+
+  const loader = app.slice(loaderStart, loaderEnd);
+  assert.ok(loader.indexOf("resetDemoScenario();") < loader.indexOf("loadCsvText(text, fileName)"));
+});
+
+test("evidence jargon is defined in plain language at the point of use", () => {
+  assert.match(html, /aria-label="Evidence terms in plain language"/);
+  assert.match(html, />PROCESS DEBT</);
+  assert.match(html, /workflow delay, not candidate risk/);
+  assert.match(html, />SENSITIVITY CHECK</);
+  assert.match(html, /from 7 to 10 days changes the sample from 9 flags to 5/);
+});

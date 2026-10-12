@@ -64,6 +64,89 @@ test("the stall boundary is inclusive", () => {
   assert.equal(below.flagged.length, 0);
 });
 
+test("inclusive boundaries hold for fast, standard, and slow stages", () => {
+  const cases = [
+    { stage: "Offer", below: "2026-10-09", exact: "2026-10-08", above: "2026-10-07" },
+    { stage: "Interview", below: "2026-10-06", exact: "2026-10-05", above: "2026-10-04" },
+    { stage: "Assessment", below: "2026-10-02", exact: "2026-10-01", above: "2026-09-30" },
+  ];
+  const rows = cases.flatMap(({ stage, below, exact, above }, caseIndex) =>
+    [
+      ["BELOW", below],
+      ["EXACT", exact],
+      ["ABOVE", above],
+    ].map(([position, stageEnteredOn], positionIndex) =>
+      row({
+        __line: 2 + caseIndex * 3 + positionIndex,
+        application_id: `${stage}-${position}`,
+        stage,
+        stage_entered_on: stageEnteredOn,
+      }),
+    ),
+  );
+  const analysis = analyzeBoard(rows, { asOf: AS_OF, baseThreshold: 7 });
+  assert.deepEqual(
+    analysis.healthy.map((record) => record.applicationId).sort(),
+    ["Assessment-BELOW", "Interview-BELOW", "Offer-BELOW"],
+  );
+  assert.deepEqual(
+    analysis.flagged.map((record) => record.applicationId).sort(),
+    [
+      "Assessment-ABOVE",
+      "Assessment-EXACT",
+      "Interview-ABOVE",
+      "Interview-EXACT",
+      "Offer-ABOVE",
+      "Offer-EXACT",
+    ],
+  );
+});
+
+test("empty files and duplicate headers fail visibly", () => {
+  assert.deepEqual(parseCsv(""), {
+    headers: [],
+    rows: [],
+    errors: ["The CSV is empty."],
+    warnings: [],
+  });
+  const duplicate = parseCsv(
+    "application_id,candidate_name,role,stage,stage_entered_on,owner,waiting_on,owner\n" +
+      "A-1,Asha,Engineer,Interview,2026-10-05,Priya,company,Priya\n",
+  );
+  assert.ok(duplicate.errors.includes("Duplicate column name(s): owner."));
+});
+
+test("unknown operational values are quarantined with explicit reasons", () => {
+  const analysis = analyzeBoard(
+    [row({ stage: "Sourcing", waiting_on: "blocked" })],
+    { asOf: AS_OF, baseThreshold: 7 },
+  );
+  assert.equal(analysis.invalid.length, 1);
+  assert.ok(analysis.invalid[0].errors.some((message) => message.includes("not recognized")));
+  assert.ok(analysis.invalid[0].errors.includes("waiting_on must be company, candidate, or external."));
+});
+
+test("invalid optional dates and contradictory commitments stay visible", () => {
+  const analysis = analyzeBoard(
+    [
+      row({ application_id: "BAD-CONTACT", last_contact_on: "2026-02-30" }),
+      row({ application_id: "BAD-DUE", next_step_due_on: "2026-10-04" }),
+    ],
+    { asOf: AS_OF, baseThreshold: 7 },
+  );
+  assert.equal(analysis.invalid.length, 2);
+  assert.ok(
+    analysis.invalid.find((item) => item.applicationId === "BAD-CONTACT").errors.includes(
+      "last_contact_on must use YYYY-MM-DD.",
+    ),
+  );
+  assert.ok(
+    analysis.invalid.find((item) => item.applicationId === "BAD-DUE").errors.includes(
+      "next_step_due_on is before stage_entered_on.",
+    ),
+  );
+});
+
 test("recent contact does not reset the stage clock", () => {
   const analysis = analyzeBoard(
     [row({ stage_entered_on: "2026-09-30", last_contact_on: "2026-10-12" })],
@@ -181,14 +264,31 @@ test("every flagged row gets one deterministic explanation and action", () => {
 });
 
 test("spreadsheet formula prefixes are neutralized in exports", () => {
-  assert.equal(sanitizeSpreadsheetCell("=2+2"), "'=2+2");
-  assert.equal(sanitizeSpreadsheetCell("+SUM(A1)"), "'+SUM(A1)");
+  const dangerousPrefixes = ["=2+2", "+SUM(A1)", "-1+2", "@SUM(A1)", "\t=2+2", "\r=2+2"];
+  for (const value of dangerousPrefixes) {
+    assert.equal(sanitizeSpreadsheetCell(value), `'${value}`);
+  }
   const record = analyzeBoard([row({ candidate_name: "=2+2" })], {
     asOf: AS_OF,
     baseThreshold: 7,
   }).flagged[0];
   const csv = exportQueueCsv([record]);
   assert.ok(csv.includes("'=2+2"));
+});
+
+test("filtered queue export preserves supplied order, row set, and global displayed ranks", () => {
+  const analysis = analyzeBoard(
+    [
+      row({ application_id: "APP-A", candidate_name: "First" }),
+      row({ application_id: "APP-B", candidate_name: "Second" }),
+    ],
+    { asOf: AS_OF, baseThreshold: 7 },
+  );
+  const supplied = [...analysis.flagged].reverse();
+  const lines = exportQueueCsv(supplied).split("\n");
+  assert.equal(lines.length, supplied.length + 1);
+  assert.ok(lines[1].startsWith("2,APP-B,"));
+  assert.ok(lines[2].startsWith("1,APP-A,"));
 });
 
 test("raising the base limit cannot increase the flagged set", () => {

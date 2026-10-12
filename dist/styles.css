@@ -1526,6 +1526,40 @@ a:focus-visible {
   max-width: 540px;
 }
 
+.evidence-glossary {
+  background: color-mix(in srgb, var(--sea) 34%, var(--paper-bright));
+  border: 1px solid var(--ink);
+  border-top: 0;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.evidence-glossary > div {
+  display: grid;
+  gap: 8px;
+  grid-template-columns: minmax(110px, 0.34fr) 1fr;
+  padding: 17px 20px;
+}
+
+.evidence-glossary > div + div {
+  border-left: 1px solid var(--ink);
+}
+
+.evidence-glossary span {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  line-height: 1.45;
+}
+
+.evidence-glossary p {
+  color: var(--ink-soft);
+  font-size: 11px;
+  line-height: 1.55;
+  margin: 0;
+}
+
 .benchmark-grid {
   display: grid;
   gap: 14px;
@@ -2113,6 +2147,8 @@ a:focus-visible {
   .quality-panel { grid-column: auto; }
   .evidence-lab { padding-bottom: 62px; padding-top: 26px; }
   .evidence-heading { grid-template-columns: 1fr; }
+  .evidence-glossary { grid-template-columns: 1fr; }
+  .evidence-glossary > div + div { border-left: 0; border-top: 1px solid var(--ink); }
   .benchmark-card--results { grid-column: 1 / -1; }
   .benchmark-card--proof,
   .benchmark-card--demo,
@@ -2156,6 +2192,7 @@ a:focus-visible {
   .score-breakdown { min-width: min(310px, calc(100vw - 48px)); right: -2px; }
   .threshold-rail { grid-template-columns: 1fr 1fr; }
   .evidence-heading h2 { font-size: 50px; }
+  .evidence-glossary > div { grid-template-columns: 1fr; padding: 15px 16px; }
   .benchmark-card--proof,
   .benchmark-card--demo,
   .benchmark-card--method { grid-column: 1 / -1; }

@@ -1,0 +1,62 @@
+{
+  "evidence_id": "driftline-2026-10-12T19:57:35+05:30",
+  "captured_on": "2026-10-12T19:57:35+05:30",
+  "calendar_days_completed": 1,
+  "engine_source": {
+    "core": "src/core.js",
+    "core_sha256": "381b1c6cba6616db476e27ee4f329bf6cbe0398caa13c853464970f0fc30cea1",
+    "benchmark": "src/benchmark.js",
+    "benchmark_sha256": "34786832641682caf92fa561088444466416515f844c84949fae70901ef32822"
+  },
+  "test_suite": {
+    "command": "npm test",
+    "passing": 34,
+    "failing": 0
+  },
+  "cli_benchmark": {
+    "command": "npm run benchmark",
+    "scope": "CSV parse + validation + ranking",
+    "as_of": "2026-10-12",
+    "warmups": 5,
+    "measured_runs": 25,
+    "generation_timed": false,
+    "file_io_timed": false,
+    "dom_rendering_timed": false,
+    "outliers_removed": false,
+    "environment": {
+      "hardware": "Apple M2",
+      "memory_bytes": 8589934592,
+      "architecture": "arm64",
+      "operating_system": "macOS 26.5.1 (25F80)",
+      "node": "v24.21.0"
+    },
+    "results": [
+      { "rows": 100, "median_ms": 0.4, "p95_ms": 0.79, "rows_per_second": 250313, "correctness": "PASS" },
+      { "rows": 1000, "median_ms": 4.43, "p95_ms": 7.55, "rows_per_second": 225613, "correctness": "PASS" },
+      { "rows": 10000, "median_ms": 49.49, "p95_ms": 146.99, "rows_per_second": 202078, "correctness": "PASS" }
+    ]
+  },
+  "browser_verification": {
+    "public_url": "https://driftline-pranay-2026-x20.blondpearl1024.chatgpt.site/",
+    "anonymous_http_status": 200,
+    "redirects": 0,
+    "viewports_css_px": [390, 500, 821, 1180, 1440],
+    "horizontal_overflow": false,
+    "console_warnings_or_errors": 0,
+    "workflows": [
+      "sample baseline reset",
+      "threshold 7 to 10 changes queue 9 to 5",
+      "search and stage, owner, responsibility filters",
+      "rank explanation",
+      "data-quality review",
+      "full filtered queue export with global ranks",
+      "adversarial demo",
+      "browser benchmark"
+    ]
+  },
+  "timeline": {
+    "day_1": "complete",
+    "days_2_to_5": "planned_not_yet_evidence",
+    "backdated": false
+  }
+}
