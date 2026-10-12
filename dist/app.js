@@ -32,6 +32,8 @@ const state = {
 };
 
 const dom = {
+  hero: document.querySelector(".hero"),
+  parallaxButtons: document.querySelectorAll("[data-parallax-button]"),
   fileInput: document.querySelector("#file-input"),
   uploadButton: document.querySelector("#upload-button"),
   dropZone: document.querySelector("#drop-zone"),
@@ -69,6 +71,7 @@ const dom = {
   rulesButton: document.querySelector("#rules-button"),
   rulesDialog: document.querySelector("#rules-dialog"),
   closeRules: document.querySelector("#close-rules"),
+  acknowledgeRules: document.querySelector("#acknowledge-rules"),
   benchmarkGrid: document.querySelector("#benchmark-grid"),
   benchmarkCard: document.querySelector(".benchmark-card--results"),
   benchmarkButton: document.querySelector("#run-benchmark"),
@@ -553,6 +556,70 @@ function setupSignalSpotlights() {
   });
 }
 
+function setupHeroInteractions() {
+  const finePointer = window.matchMedia("(hover: hover) and (pointer: fine)").matches;
+  const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  if (!dom.hero || !finePointer || reducedMotion) return;
+
+  let heroFrame = null;
+  let heroPointer = null;
+  const paintHero = () => {
+    const rect = dom.hero.getBoundingClientRect();
+    const x = Math.min(1, Math.max(0, (heroPointer.clientX - rect.left) / rect.width));
+    const y = Math.min(1, Math.max(0, (heroPointer.clientY - rect.top) / rect.height));
+    dom.hero.style.setProperty("--hero-x", `${(x * 100).toFixed(2)}%`);
+    dom.hero.style.setProperty("--hero-y", `${(y * 100).toFixed(2)}%`);
+    dom.hero.style.setProperty("--hero-pan-x", `${((x - 0.5) * 14).toFixed(2)}px`);
+    dom.hero.style.setProperty("--hero-pan-y", `${((y - 0.5) * 12).toFixed(2)}px`);
+    dom.hero.style.setProperty("--hero-pan-x-neg", `${((0.5 - x) * 8).toFixed(2)}px`);
+    dom.hero.style.setProperty("--hero-pan-y-neg", `${((0.5 - y) * 7).toFixed(2)}px`);
+    heroFrame = null;
+  };
+
+  dom.hero.addEventListener("pointermove", (event) => {
+    heroPointer = event;
+    if (heroFrame !== null) return;
+    heroFrame = window.requestAnimationFrame(paintHero);
+  });
+  dom.hero.addEventListener("pointerleave", () => {
+    if (heroFrame !== null) window.cancelAnimationFrame(heroFrame);
+    heroFrame = null;
+    dom.hero.style.removeProperty("--hero-x");
+    dom.hero.style.removeProperty("--hero-y");
+    dom.hero.style.removeProperty("--hero-pan-x");
+    dom.hero.style.removeProperty("--hero-pan-y");
+    dom.hero.style.removeProperty("--hero-pan-x-neg");
+    dom.hero.style.removeProperty("--hero-pan-y-neg");
+  });
+
+  for (const button of dom.parallaxButtons) {
+    let buttonFrame = null;
+    let buttonPointer = null;
+    const resetButton = () => {
+      if (buttonFrame !== null) window.cancelAnimationFrame(buttonFrame);
+      buttonFrame = null;
+      button.style.setProperty("--button-x", "0px");
+      button.style.setProperty("--button-y", "0px");
+    };
+    const paintButton = () => {
+      const rect = button.getBoundingClientRect();
+      const x = Math.min(1, Math.max(0, (buttonPointer.clientX - rect.left) / rect.width));
+      const y = Math.min(1, Math.max(0, (buttonPointer.clientY - rect.top) / rect.height));
+      button.style.setProperty("--button-x", `${((x - 0.5) * 10).toFixed(2)}px`);
+      button.style.setProperty("--button-y", `${((y - 0.5) * 8).toFixed(2)}px`);
+      buttonFrame = null;
+    };
+    button.addEventListener("pointermove", (event) => {
+      buttonPointer = event;
+      if (buttonFrame !== null) return;
+      buttonFrame = window.requestAnimationFrame(paintButton);
+    });
+    button.addEventListener("pointerleave", resetButton);
+    button.addEventListener("pointercancel", resetButton);
+    button.addEventListener("blur", resetButton);
+  }
+}
+
 function revealQueueAfterDemo() {
   const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   document.querySelector("#priority-queue").scrollIntoView({
@@ -599,7 +666,10 @@ function bindEvents() {
     dom.fileInput.click();
   });
   dom.dropZone.addEventListener("keydown", (event) => {
-    if (event.key === "Enter" || event.key === " ") dom.fileInput.click();
+    if (event.target === dom.dropZone && (event.key === "Enter" || event.key === " ")) {
+      event.preventDefault();
+      dom.fileInput.click();
+    }
   });
   dom.fileInput.addEventListener("change", () => handleFile(dom.fileInput.files[0]));
   for (const eventName of ["dragenter", "dragover"]) {
@@ -676,6 +746,7 @@ function bindEvents() {
 
   dom.rulesButton.addEventListener("click", () => dom.rulesDialog.showModal());
   dom.closeRules.addEventListener("click", () => dom.rulesDialog.close());
+  dom.acknowledgeRules.addEventListener("click", () => dom.rulesDialog.close());
   dom.rulesDialog.addEventListener("click", (event) => {
     if (event.target === dom.rulesDialog) dom.rulesDialog.close();
   });
@@ -693,5 +764,6 @@ dom.asOfInput.value = DEMO_AS_OF;
 dom.thresholdInput.value = String(state.baseThreshold);
 bindEvents();
 setupSignalSpotlights();
+setupHeroInteractions();
 await loadSample();
 scheduleBenchmarks();

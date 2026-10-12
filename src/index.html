@@ -26,7 +26,7 @@
         </span>
       </a>
       <nav class="topbar__actions" aria-label="Product controls">
-        <span class="privacy-pill"><i></i> LOCAL / NO UPLOADS</span>
+        <span class="privacy-pill"><i></i> PUBLIC DEMO · LOCAL DATA</span>
         <a class="ghost-button benchmark-link" href="#evidence-lab">Benchmarks</a>
         <button id="rules-button" class="ghost-button" type="button">How it decides</button>
       </nav>
@@ -34,6 +34,18 @@
 
     <main id="top">
       <section class="hero shell" aria-labelledby="hero-title">
+        <div class="hero__aurora" aria-hidden="true">
+          <span class="hero__orb hero__orb--coral"></span>
+          <span class="hero__orb hero__orb--acid"></span>
+          <span class="hero__orb hero__orb--blue"></span>
+        </div>
+        <svg class="hero__grain" aria-hidden="true" focusable="false">
+          <filter id="driftline-grain">
+            <feTurbulence type="fractalNoise" baseFrequency="0.78" numOctaves="3" seed="7" stitchTiles="stitch" />
+            <feColorMatrix type="saturate" values="0" />
+          </filter>
+          <rect width="100%" height="100%" filter="url(#driftline-grain)" />
+        </svg>
         <div class="hero__copy">
           <p class="eyebrow"><span>OPS SIGNAL 01</span> / FOLLOW-UP DEBT</p>
           <h1 id="hero-title">Find the silence <em>before</em> candidates feel it.</h1>
@@ -41,6 +53,24 @@
             A local-first stall alerter that turns a hiring-board CSV into an explainable queue:
             who needs attention, why they rank here, and what a human should do next.
           </p>
+          <div class="hero__actions" aria-label="Start exploring Driftline">
+            <a class="glass-cta" data-parallax-button href="#input-deck">
+              <span class="glass-cta__plate" aria-hidden="true"></span>
+              <span class="glass-cta__face">
+                <span>Open sample board</span>
+                <span class="glass-cta__arrow" aria-hidden="true">↘</span>
+              </span>
+            </a>
+            <a class="vector-cta" href="#evidence-lab">
+              <span class="vector-cta__label">Inspect the evidence</span>
+              <span class="vector-cta__arrow" aria-hidden="true">↗</span>
+              <span class="vector-cta__status" aria-hidden="true">PROOF SURFACE</span>
+              <i class="vector-cta__node vector-cta__node--tl" aria-hidden="true"></i>
+              <i class="vector-cta__node vector-cta__node--tr" aria-hidden="true"></i>
+              <i class="vector-cta__node vector-cta__node--bl" aria-hidden="true"></i>
+              <i class="vector-cta__node vector-cta__node--br" aria-hidden="true"></i>
+            </a>
+          </div>
           <div class="principle">
             <span class="principle__number">01</span>
             <p><strong>A check-in is not movement.</strong> Driftline measures time since the last real stage change, while contact age stays a supporting signal.</p>
@@ -55,11 +85,13 @@
             <strong>IN THE</strong>
             <span>LOOP</span>
           </div>
+          <span class="signal-tag signal-tag--top">DETERMINISTIC</span>
+          <span class="signal-tag signal-tag--side">REVIEW REQUIRED</span>
           <p>NO AUTO-SEND<br />NO ATS WRITES<br />NO CANDIDATE SCORING</p>
         </div>
       </section>
 
-      <section class="control-deck shell" aria-label="Input and scenario controls">
+      <section id="input-deck" class="control-deck shell" aria-label="Input and scenario controls">
         <div id="drop-zone" class="drop-zone" role="button" tabindex="0" aria-label="Choose or drop a CSV file">
           <input id="file-input" type="file" accept=".csv,text/csv" hidden />
           <div class="drop-zone__icon" aria-hidden="true">↥</div>
@@ -257,7 +289,7 @@
 
           <article class="benchmark-card benchmark-card--proof signal-spotlight">
             <p class="label">CORRECTNESS GATE</p>
-            <div class="proof-score"><strong>21</strong><span>/ 21<br />PASSING</span></div>
+            <div class="proof-score"><strong>25</strong><span>/ 25<br />PASSING</span></div>
             <ul class="proof-list">
               <li><span>✓</span> Exact sample reconciliation</li>
               <li><span>✓</span> Stable order across every run</li>
@@ -345,7 +377,7 @@
           <div><h3>Keep the decision human</h3><p>Fixed templates explain the facts and suggest an action. Driftline never advances, rejects, messages, or edits a candidate record.</p></div>
         </section>
       </div>
-      <div class="dialog-foot"><span>Same input + same settings = same queue.</span><button class="solid-button" type="button" onclick="this.closest('dialog').close()">Understood</button></div>
+      <div class="dialog-foot"><span>Same input + same settings = same queue.</span><button id="acknowledge-rules" class="solid-button" type="button">Understood</button></div>
     </dialog>
 
     <div id="toast" class="toast" role="status"></div>

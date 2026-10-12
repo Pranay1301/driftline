@@ -36,7 +36,7 @@ To run the automated checks:
 npm test
 ```
 
-Expected result: **21 passing tests**.
+Expected result: **25 passing tests**.
 
 To run the repeatable local engine benchmark:
 
