@@ -13,6 +13,7 @@ test("hero calls to action remain native links with valid page targets", () => {
   assert.match(html, /<a class="vector-cta"[^>]+href="#evidence-lab"/);
   assert.match(html, /id="input-deck"/);
   assert.match(html, /id="evidence-lab"/);
+  assert.match(css, /#top,\s*#input-deck,\s*#priority-queue,\s*#evidence-lab\s*\{\s*scroll-margin-top:/);
 });
 
 test("all new visual layers are decorative and the visible hero keeps a heading", () => {

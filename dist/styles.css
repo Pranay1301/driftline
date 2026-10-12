@@ -70,6 +70,7 @@ a:focus-visible {
   width: 100%;
 }
 
+#top,
 #input-deck,
 #priority-queue,
 #evidence-lab {
