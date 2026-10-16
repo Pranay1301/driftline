@@ -6,7 +6,29 @@ Driftline implements assignment option C. It reads a CSV, finds active applicati
 
 It does **not** judge candidate quality, send messages, or write to an ATS. Uploaded data stays in the browser.
 
-![Driftline queue](docs/driftline-queue.png)
+![Driftline running on the public deployment](docs/screenshots/01-home.jpg)
+
+## Live deployment screenshots
+
+[Open Driftline](https://driftline-pranay-2026-x20.blondpearl1024.chatgpt.site/). These captures were taken from the deployed URL in a browser on October 17, 2026. The data is fictional. The live benchmark varies by browser and device; at capture, its 10,000-row run measured 35.7 ms median and 42.5 ms p95, with correctness passing.
+
+### Priority queue and rank explanation
+
+![Live priority queue with a score breakdown expanded](docs/screenshots/05-live-explanation.jpg)
+
+### Benchmark and correctness results
+
+![Live benchmark results and correctness gate](docs/screenshots/03-live-benchmark-section.jpg)
+
+### Sensitivity check at a 10-day base limit
+
+![Live 10-day sensitivity result showing five stalled applications](docs/screenshots/04-live-sensitivity-queue.jpg)
+
+### Safety boundary
+
+![Live safety guardrails for input limits, ambiguity, data minimization, and human review](docs/screenshots/07-live-safety-boundary.jpg)
+
+Full-page captures from the same browser session are also available in `docs/screenshots/`.
 
 ## Quick start
 
@@ -221,6 +243,15 @@ driftline/
 ├── .openai/hosting.json
 ├── dist/                    # ready-to-serve static build
 ├── docs/                    # submission narratives and image
+│   ├── screenshots/         # live deployment captures
+│   ├── benchmark-report.md
+│   ├── ai-evidence.md
+│   ├── five-day-log.md
+│   ├── intent.md
+│   ├── Final directive.md
+│   └── unlearning-note.pdf
+├── media/
+│   └── driftline-demo.mp4   # five-minute walkthrough
 ├── sample-data/
 │   ├── hiring_board.csv
 │   └── adversarial.csv
