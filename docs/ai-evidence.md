@@ -1,6 +1,6 @@
 # Driftline - AI-use evidence receipts
 
-**Compiled:** 12 October 2026 (Asia/Kolkata)  
+**Compiled:** 16 October 2026 (Asia/Kolkata)
 **Scope:** Direct user instructions, repository artifacts, Git history, and commands run against this working tree.
 
 These receipts show where AI affected the work and where a human check changed the result. They are not a claim that every chat message was preserved. When exact prompt text was not retained, the prompt is labeled **reconstructed summary - not verbatim**. The reviewer instruction in Receipt 4 is quoted directly from the instruction supplied on 12 October 2026.
@@ -109,11 +109,36 @@ The review also requested exact boundary checks, adversarial CSV cases, privacy 
 - `docs/five-day-log.md` - the same-day disclosure and preserved future calendar entries
 - `docs/final-evidence.json` - the synchronized release snapshot
 
+## Receipt 6 - finish the calendar log without filling the gaps
+
+**When and provenance:** Direct user instruction on Calendar Day 5, 16 October 2026, followed by a readiness audit, fresh tests, a fresh benchmark, artifact validation, and public-access verification.
+
+**Exact prompt:**
+
+> "For the fixes:"
+>
+> "- 1. complete the first part as it should have been"
+>
+> "- 2. I'll record loom at the end, so no worries"
+
+**AI proposal under review:** Treat the now-elapsed calendar dates as an opportunity to complete the required log. The unsafe shortcut would be to redistribute Day-1 work across Days 2-4 so the process appeared continuous.
+
+**Human verification:** Git history and artifact timestamps showed implementation work on 12 October and no recorded task activity on 13-15 October. On 16 October, the actual final audit reran 39 tests, rebuilt the site, validated the ZIP and video, verified public HTTP access, and captured a fresh 5-warmup / 25-run benchmark.
+
+**Decision:** Complete all five date entries, record Days 2-4 as no-work days, and use only the real Day-5 verification as new evidence. Synchronize the fresh benchmark across every release narrative. Leave the Loom account action to the applicant as requested.
+
+**Inspectable artifacts:**
+
+- `docs/five-day-log.md` - five dated entries with explicit no-work gaps
+- `docs/final-evidence.json` - Day-5 canonical test and benchmark snapshot
+- `tests/evidence.test.mjs` - consistency and timeline assertions
+- `docs/benchmark-report.md` and `docs/unlearning.md` - synchronized final claims
+
 ## Timeline integrity statement
 
-As of 12 October 2026, Driftline has evidence for **one completed calendar day**, with multiple build passes inside that day. This document will not fabricate work on 13-16 October, alter Git timestamps, or present planned checks as completed checks. Days 2-5 may only become evidence after genuine work is performed on those dates (or later) and the prompt, failure or observation, verification, and resulting change are recorded.
+As of 16 October 2026, all five calendar dates are documented. Day 1 contains the build and same-day rehearsal, Days 2-4 explicitly record no task work, and Day 5 contains the final verification. This document does not fabricate activity on the inactive dates, alter Git timestamps, or present the Day-1 rehearsal as later work.
 
-That means the five-day process requirement is not yet fully satisfied. The honest remedy is elapsed time plus real iteration, not narrative relabeling.
+The five-date logging requirement is now satisfied, while the record still shows that only two dates contain activity. That limitation is part of the evidence rather than something to hide.
 
 ## Evidence rule for the final submission
 

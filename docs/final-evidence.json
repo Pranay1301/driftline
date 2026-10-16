@@ -1,7 +1,8 @@
 {
-  "evidence_id": "driftline-2026-10-12T20:42:00+05:30",
-  "captured_on": "2026-10-12T20:42:00+05:30",
-  "calendar_days_completed": 1,
+  "evidence_id": "driftline-2026-10-16T19:25:08+05:30",
+  "captured_on": "2026-10-16T19:25:08+05:30",
+  "calendar_dates_documented": 5,
+  "calendar_dates_with_activity": 2,
   "engine_source": {
     "core": "src/core.js",
     "core_sha256": "55900456d87394cd3cdfb870f8f8494191e03d6c55ecc17c241545e6792356c1",
@@ -31,9 +32,9 @@
       "node": "v24.21.0"
     },
     "results": [
-      { "rows": 100, "median_ms": 0.39, "p95_ms": 0.66, "rows_per_second": 255320, "correctness": "PASS" },
-      { "rows": 1000, "median_ms": 3.84, "p95_ms": 4.51, "rows_per_second": 260086, "correctness": "PASS" },
-      { "rows": 10000, "median_ms": 40.38, "p95_ms": 49.26, "rows_per_second": 247628, "correctness": "PASS" }
+      { "rows": 100, "median_ms": 0.64, "p95_ms": 1.32, "rows_per_second": 156270, "correctness": "PASS" },
+      { "rows": 1000, "median_ms": 4.42, "p95_ms": 6.88, "rows_per_second": 226338, "correctness": "PASS" },
+      { "rows": 10000, "median_ms": 44.34, "p95_ms": 57.80, "rows_per_second": 225515, "correctness": "PASS" }
     ]
   },
   "browser_verification": {
@@ -56,8 +57,11 @@
     ]
   },
   "timeline": {
-    "day_1": "complete",
-    "days_2_to_5": "planned_not_yet_evidence",
+    "day_1": "complete_build_and_rehearsal",
+    "day_2": "documented_no_work",
+    "day_3": "documented_no_work",
+    "day_4": "documented_no_work",
+    "day_5": "complete_final_verification",
     "backdated": false,
     "same_day_rehearsal": [
       "multi-stage boundary matrix",

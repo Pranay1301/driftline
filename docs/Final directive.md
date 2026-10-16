@@ -1,7 +1,7 @@
 # Driftline — Final Directive
 
 **Status:** Frozen build contract  
-**Evidence snapshot:** `driftline-2026-10-12T20:42:00+05:30`
+**Evidence snapshot:** `driftline-2026-10-16T19:25:08+05:30`
 **Implementation:** post-review release candidate
 
 Build and verify Driftline as a browser-based, local-first hiring-board stall alerter. It turns a CSV into an auditable follow-up queue and must never present its output as a judgment of candidate quality.
@@ -140,7 +140,7 @@ Columns:
 - Manual score oracle: Offer at 6 days with a 4-day limit, 2-day overdue promise, company wait, and 4-day contact age = `150 + 30 + 15 + 4 = 199`
 - Sensitivity: base 7 shows 9 rows; base 10 shows 5
 - Export: all filtered matches in displayed order with displayed global ranks preserved
-- Performance: repeatable parse + validation + ranking benchmark at 10,000 rows: 40.38 ms median / 49.26 ms p95, correctness PASS; 5 warmups and 25 measured runs on Apple M2 / 8 GB / macOS 26.5.1 / Node 24.21.0
+- Performance: repeatable parse + validation + ranking benchmark at 10,000 rows: 44.34 ms median / 57.80 ms p95, correctness PASS; 5 warmups and 25 measured runs on Apple M2 / 8 GB / macOS 26.5.1 / Node 24.21.0
 - Browser: sample reset, upload path, threshold and filters, score drawer, rules, quality panel, adversarial demo, and export checked; viewport audit passed at 390, 500, 821, 1180, and 1440 CSS pixels without horizontal overflow or console warnings/errors
 - Source of truth: `docs/final-evidence.json`; full method and limitations: `docs/benchmark-report.md`
 

@@ -22,20 +22,22 @@ test("release narratives consume one canonical evidence snapshot", async () => {
   const tenThousand = evidence.cli_benchmark.results.find((result) => result.rows === 10000);
   assert.deepEqual(
     { median: tenThousand.median_ms, p95: tenThousand.p95_ms, check: tenThousand.correctness },
-    { median: 40.38, p95: 49.26, check: "PASS" },
+    { median: 44.34, p95: 57.8, check: "PASS" },
   );
   for (const [name, document] of Object.entries({ readme, directive, unlearning, demo, report })) {
     assert.match(document, /39\/39/, `${name} must use the canonical test count`);
-    assert.match(document, /40\.38 ms/, `${name} must use the canonical 10k median`);
-    assert.match(document, /49\.26 ms/, `${name} must use the canonical 10k p95`);
+    assert.match(document, /44\.34 ms/, `${name} must use the canonical 10k median`);
+    assert.match(document, /57\.80 ms/, `${name} must use the canonical 10k p95`);
     assert.doesNotMatch(document, /21\/21|25\/25|34\/34|roughly 28 ms|about 28 ms|34\.92 ms|35\.52 ms/);
   }
   assert.match(html, /<strong>39<\/strong><span>\/ 39<br \/>PASSING<\/span>/);
-  assert.match(html, /39\/39 tests · 10,000 rows: 40\.38 ms median \/ 49\.26 ms p95/);
+  assert.match(html, /39\/39 tests · 10,000 rows: 44\.34 ms median \/ 57\.80 ms p95/);
   assert.equal(evidence.safety_guardrails.structural_failures_stop_ranking, true);
   assert.equal(evidence.safety_guardrails.export_review_status, "NEEDS_HUMAN_REVIEW");
-  assert.equal(evidence.calendar_days_completed, 1);
-  assert.equal(evidence.timeline.days_2_to_5, "planned_not_yet_evidence");
-  assert.match(log, /Day 2 - 2026-10-13 - PLANNED, NOT YET EVIDENCE/);
-  assert.match(log, /not\*{0,2} five elapsed days/i);
+  assert.equal(evidence.calendar_dates_documented, 5);
+  assert.equal(evidence.calendar_dates_with_activity, 2);
+  assert.equal(evidence.timeline.day_2, "documented_no_work");
+  assert.equal(evidence.timeline.day_5, "complete_final_verification");
+  assert.match(log, /Day 2 - 2026-10-13 - DOCUMENTED, NO WORK PERFORMED/);
+  assert.match(log, /five-date log with two activity days/i);
 });

@@ -1,7 +1,7 @@
 # Driftline Final Evidence and Benchmark Report
 
-**Evidence ID:** `driftline-2026-10-12T20:42:00+05:30`
-**Captured:** 2026-10-12 20:42:00 IST
+**Evidence ID:** `driftline-2026-10-16T19:25:08+05:30`
+**Captured:** 2026-10-16 19:25:08 IST
 **Canonical machine record:** `docs/final-evidence.json`
 
 ## Release gate
@@ -20,11 +20,11 @@ Environment: Apple M2, 8 GB memory, arm64, macOS 26.5.1 (25F80), Node v24.21.0.
 
 | Rows | Median | P95 | Rows/second at median | Correctness |
 |---:|---:|---:|---:|---:|
-| 100 | 0.39 ms | 0.66 ms | 255,320 | PASS |
-| 1,000 | 3.84 ms | 4.51 ms | 260,086 | PASS |
-| 10,000 | 40.38 ms | 49.26 ms | 247,628 | PASS |
+| 100 | 0.64 ms | 1.32 ms | 156,270 | PASS |
+| 1,000 | 4.42 ms | 6.88 ms | 226,338 | PASS |
+| 10,000 | 44.34 ms | 57.80 ms | 225,515 | PASS |
 
-Every measured result was accepted only because its fixed output signature was correct and deterministic. The 10,000-row result is **40.38 ms median / 49.26 ms p95**, correctness PASS. The p95 is reported as observed; it is not removed to make the result look smoother.
+Every measured result was accepted only because its fixed output signature was correct and deterministic. The 10,000-row result is **44.34 ms median / 57.80 ms p95**, correctness PASS. The p95 is reported as observed; it is not removed to make the result look smoother.
 
 These measurements establish only how this prototype's engine behaved on one machine. They do not establish server capacity, concurrent-user behavior, DOM performance for 10,000 rendered cards, or production readiness.
 
@@ -63,4 +63,4 @@ This verifies responsive browser behavior at the stated widths. It is not a clai
 
 The engine files used for the benchmark are identified in `docs/final-evidence.json` by SHA-256. This report, README, final directive, unlearning note source, demo script, and site proof counter are checked against the same manifest by `tests/evidence.test.mjs`.
 
-Only one calendar day is complete. Days 2-5 in `docs/five-day-log.md` remain plans, not evidence.
+All five calendar dates are documented. Days 1 and 5 contain actual work; Days 2-4 explicitly record that no task work was performed. No Day-1 activity is relabeled as later evidence.

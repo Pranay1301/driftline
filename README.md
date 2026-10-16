@@ -200,9 +200,9 @@ Canonical release snapshot (`docs/final-evidence.json`), captured 2026-10-12 at 
 
 | Rows | Median | P95 | Rows / second | Correctness |
 |---:|---:|---:|---:|---:|
-| 100 | 0.39 ms | 0.66 ms | 255,320 | PASS |
-| 1,000 | 3.84 ms | 4.51 ms | 260,086 | PASS |
-| 10,000 | 40.38 ms | 49.26 ms | 247,628 | PASS |
+| 100 | 0.64 ms | 1.32 ms | 156,270 | PASS |
+| 1,000 | 4.42 ms | 6.88 ms | 226,338 | PASS |
+| 10,000 | 44.34 ms | 57.80 ms | 225,515 | PASS |
 
 Data generation, file reading, and DOM rendering are outside the timer. These numbers demonstrate the prototype engine on one machine; they are not a production-capacity claim. Browser values vary and are intentionally measured again on each device.
 

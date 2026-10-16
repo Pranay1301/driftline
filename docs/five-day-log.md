@@ -2,15 +2,15 @@
 
 ## Timeline disclosure
 
-Work began on **12 October 2026**. Everything currently completed happened on that calendar day in five build passes. Those passes are recorded under Day 1 below; they are **not** five elapsed days. Days 2-5 remain planned until their dated experiments are actually performed. Planned entries are not evidence and must not be marked complete or backdated.
+Work began on **12 October 2026**. The implementation and same-day rehearsal happened on Day 1. No task work was performed on 13-15 October; those dates are recorded plainly instead of being filled with reconstructed activity. Work resumed on 16 October for the final verification and submission audit. This is an honest five-date log with two activity days, not a claim of five full workdays.
 
 | Calendar day | Date | Honest status |
 |---|---|---|
 | Day 1 | 2026-10-12 | COMPLETE - five build passes |
-| Day 2 | 2026-10-13 | PLANNED - NOT YET EVIDENCE |
-| Day 3 | 2026-10-14 | PLANNED - NOT YET EVIDENCE |
-| Day 4 | 2026-10-15 | PLANNED - NOT YET EVIDENCE |
-| Day 5 | 2026-10-16 | PLANNED - NOT YET EVIDENCE |
+| Day 2 | 2026-10-13 | DOCUMENTED - NO WORK PERFORMED |
+| Day 3 | 2026-10-14 | DOCUMENTED - NO WORK PERFORMED |
+| Day 4 | 2026-10-15 | DOCUMENTED - NO WORK PERFORMED |
+| Day 5 | 2026-10-16 | COMPLETE - FINAL VERIFICATION |
 
 ## Day 1 - 2026-10-12 - COMPLETE
 
@@ -76,7 +76,7 @@ Work began on **12 October 2026**. Everything currently completed happened on th
 - Verified anonymous access to the public URL returns Driftline with HTTP 200 and no redirect.
 - Added evidence-drift checks so stale test and benchmark figures fail the suite.
 - Preserved explicit limits: calendar days, fixed stage taxonomy, browser memory, 2 MB / 25,000-row / 64-column workload ceilings, no ATS sync, authentication, automatic messaging, or production-readiness claim.
-- Corrected the submission story instead of hiding the fact that only one calendar day has elapsed.
+- Kept all Day-1 work on its actual date rather than distributing it across later calendar entries.
 
 **Final Day-1 evidence:** `npm test` and `npm run benchmark` results are copied from `docs/final-evidence.json`; that manifest is the only numeric source of truth.
 
@@ -100,21 +100,35 @@ The user asked to run the recommended Day 2-5 checks immediately and improve gua
 
 **Evidence:** `tests/core.test.mjs`, `tests/frontend.test.mjs`, `src/core.js`, `src/index.html`, and `docs/final-evidence.json`.
 
-## Day 2 - 2026-10-13 - PLANNED, NOT YET EVIDENCE
+## Day 2 - 2026-10-13 - DOCUMENTED, NO WORK PERFORMED
 
-From a clean copy, rerun the exact/below/above threshold matrix across multiple stages. Record the actual commands, output, any disagreement, and resulting change. Do not replace this section with a completed entry before the work happens on this date.
+No prompts, code changes, tests, benchmarks, or browser checks were performed on this date. The planned boundary rerun did not happen. Recording the gap is more accurate than converting the Day-1 rehearsal into Day-2 evidence.
 
-## Day 3 - 2026-10-14 - PLANNED, NOT YET EVIDENCE
+## Day 3 - 2026-10-14 - DOCUMENTED, NO WORK PERFORMED
 
-Run the malformed, contradictory, duplicate, HTML, formula, and sensitive-field corpus again. Inspect both the validation report and queue export. Record actual failures and decisions only.
+No prompts, code changes, tests, benchmarks, or export inspection were performed on this date. The adversarial corpus remained covered by the Day-1 automated suite, but it was not rerun as a new Day-3 experiment.
 
-## Day 4 - 2026-10-15 - PLANNED, NOT YET EVIDENCE
+## Day 4 - 2026-10-15 - DOCUMENTED, NO WORK PERFORMED
 
-Perform the browser workflow in a fresh session: upload, threshold change, each filter, search, rank explanation, full filtered export, keyboard use, reduced-motion behavior, and narrow viewport. Record the tested browser and widths.
+No prompts, code changes, tests, or fresh browser session were performed on this date. The browser evidence remains the dated Day-1 rehearsal; it is not relabeled as Day-4 work.
 
-## Day 5 - 2026-10-16 - PLANNED, NOT YET EVIDENCE
+## Day 5 - 2026-10-16 - COMPLETE, FINAL VERIFICATION
 
-Verify anonymous public access, reproduce the README from a clean start, run the synchronized final test/benchmark snapshot, audit every submitted number, record the final video, and freeze the release. Mark complete only after these actions occur on this date.
+**Load:** Decide whether the submission is actually ready without rewriting the inactive days.
+
+- Re-ran `npm test`: 39/39 passed, 0 failed.
+- Re-ran `npm run build`: the static build completed successfully.
+- Ran a fresh canonical benchmark with 5 warmups and 25 measured runs. At 10,000 rows the engine measured 44.34 ms median / 57.80 ms p95 with correctness PASS.
+- Validated the code ZIP with `unzip -t` and confirmed the five-minute MP4 is 302.84 seconds.
+- Verified anonymous public access: HTTP 200, zero redirects, active public Site version 6 before the documentation refresh.
+- Audited Git history and file timestamps. They showed implementation commits only on 12 October, which confirmed that 13-15 October must remain no-work entries.
+- Synchronized the manifest, README, directive, benchmark report, unlearning note, demo evidence, and Site proof surface to this Day-5 snapshot.
+
+**What changed:** The five-date log is now complete without inventing three days of activity. The release narrative distinguishes elapsed dates, activity days, and no-work days.
+
+**Evidence:** `docs/final-evidence.json`, the Day-5 command output, the rebuilt submission ZIP, refreshed media, and the public Site deployment.
+
+**Manual dependency:** the final Loom recording/upload remains intentionally separate and will be completed by the applicant before submission.
 
 ## Inspectable AI-use receipts
 

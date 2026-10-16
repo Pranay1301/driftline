@@ -10,8 +10,8 @@
 - [ ] Open every uploaded file once from the submission page.
 - [ ] Check that all seven required circles are complete before selecting **Submit Quest**.
 
-Before submitting, confirm that the calendar log is truthful. As of 12 October 2026, only Day 1 is complete; Days 2-5 are planned and are not yet evidence. Do not mark them complete or submit them as five elapsed days until the dated work actually occurs.
+Before submitting, confirm that the calendar log remains truthful: Day 1 contains the build, Days 2-4 explicitly record no work, and Day 5 contains the final verification. Do not replace the no-work entries with reconstructed activity.
 
-Final evidence ID: `driftline-2026-10-12T20:42:00+05:30` - 39/39 tests, 10,000-row benchmark at 40.38 ms median / 49.26 ms p95, correctness PASS.
+Final evidence ID: `driftline-2026-10-16T19:25:08+05:30` - 39/39 tests, 10,000-row benchmark at 44.34 ms median / 57.80 ms p95, correctness PASS.
 
 Do not claim that the Loom link is complete until the authenticated upload succeeds.

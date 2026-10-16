@@ -36,10 +36,10 @@ The generated narrated MP4 follows these beats and expands each section slightly
 
 ## 4:25–4:50 — Evidence
 
-“The canonical release snapshot has 39/39 automated tests passing. They cover parsing, workload ceilings, fail-closed structure, multi-stage boundaries, contradictory and duplicate data, deterministic ties, identity invariance, safe rendering, review-labeled exports, reset behavior, and global export ranks. The repeatable 10,000-row engine benchmark measured 40.38 ms median and 49.26 ms p95 with correctness passing. The live table is a separate device-specific browser check. Browser checks covered 390 through 1440 CSS pixels, filters, sensitivity, score disclosure, validation, and export.”
+“The Day-5 canonical release snapshot has 39/39 automated tests passing. They cover parsing, workload ceilings, fail-closed structure, multi-stage boundaries, contradictory and duplicate data, deterministic ties, identity invariance, safe rendering, review-labeled exports, reset behavior, and global export ranks. The repeatable 10,000-row engine benchmark measured 44.34 ms median and 57.80 ms p95 with correctness passing. The live table is a separate device-specific browser check. Browser checks covered 390 through 1440 CSS pixels, filters, sensitivity, score disclosure, validation, and export.”
 
 ## 4:50–5:05 — Honest close
 
-“The limits are deliberate and documented: calendar days only, fixed stage factors, no ATS sync, no automatic messages, and no production security claim. The build has five passes but only one completed calendar day; future days are not backdated. What I unlearned is that AI-first does not remove judgment. It makes the generate-and-challenge loop faster, while evidence earns every important claim.”
+“The limits are deliberate and documented: calendar days only, fixed stage factors, no ATS sync, no automatic messages, and no production security claim. The five-date log is honest: Day one contains the build, Days two through four record no work, and Day five contains final verification. What I unlearned is that AI-first does not remove judgment. It makes the generate-and-challenge loop faster, while evidence earns every important claim.”
 
-Release evidence ID: `driftline-2026-10-12T20:42:00+05:30`. Final snapshot: **39/39** tests; 10,000 rows at **40.38 ms** median / **49.26 ms** p95, correctness PASS.
+Release evidence ID: `driftline-2026-10-16T19:25:08+05:30`. Final snapshot: **39/39** tests; 10,000 rows at **44.34 ms** median / **57.80 ms** p95, correctness PASS.
